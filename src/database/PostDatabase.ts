@@ -10,13 +10,15 @@ export class PostDatabase extends BaseDatabase {
         if (q) {
             const result: TPost[] = await BaseDatabase.connection(
                 PostDatabase.TABLE_POSTS
-            ).where('content', 'LIKE', `%${q}%`);
+            )
+                .where('content', 'LIKE', `%${q}%`)
+                .orderBy('id', 'ASC');
 
             postsDB = result;
         } else {
             const result: TPost[] = await BaseDatabase.connection(
                 PostDatabase.TABLE_POSTS
-            );
+            ).orderBy('id', 'ASC');
 
             postsDB = result;
         }
