@@ -2,6 +2,7 @@ import { format } from 'date-fns';
 import { UserDatabase } from '../database/UserDatabase';
 import { User } from '../models/User';
 import { TUser } from '../types';
+import { BadRequestError } from '../errors/BadRequestError';
 
 export class UserBusiness {
     // GET
@@ -32,36 +33,30 @@ export class UserBusiness {
         const { id, name, email, password, role } = input;
 
         if (typeof id !== 'string') {
-            // res.status(400);
-            throw new Error("'id' deve ser string");
+            throw new BadRequestError("'id' deve ser string");
         }
 
         if (typeof name !== 'string') {
-            // res.status(400);
-            throw new Error("'name' deve ser string");
+            throw new BadRequestError("'name' deve ser string");
         }
 
         if (typeof email !== 'string') {
-            // res.status(400);
-            throw new Error("'email' deve ser string");
+            throw new BadRequestError("'email' deve ser string");
         }
 
         if (typeof password !== 'string') {
-            // res.status(400);
-            throw new Error("'password' deve ser string");
+            throw new BadRequestError("'password' deve ser string");
         }
 
         if (typeof role !== 'string') {
-            // res.status(400);
-            throw new Error("'role' deve ser string");
+            throw new BadRequestError("'role' deve ser string");
         }
 
         const userDatabase = new UserDatabase();
         const userDBExists = await userDatabase.findUserById(id);
 
         if (userDBExists) {
-            // res.status(400);
-            throw new Error("'id' já existe");
+            throw new BadRequestError("'id' já existe");
         }
 
         const user = new User(
@@ -108,8 +103,7 @@ export class UserBusiness {
         const userDBExists = await userDatabase.findUserById(id);
 
         if (!userDBExists) {
-            // res.status(400);
-            throw new Error("'id' não encontrado");
+            throw new BadRequestError("'id' não encontrado");
         }
 
         const user = new User(
@@ -123,43 +117,38 @@ export class UserBusiness {
 
         if (newId !== undefined) {
             if (typeof newId !== 'string') {
-                // res.status(400);
-                throw new Error("'newId' deve ser string");
+                throw new BadRequestError("'newId' deve ser string");
             }
         }
 
         if (newName !== undefined) {
             if (typeof newName !== 'string') {
-                // res.status(400);
-                throw new Error("'newName' deve ser string");
+                throw new BadRequestError("'newName' deve ser string");
             }
         }
 
         if (newEmail !== undefined) {
             if (typeof newEmail !== 'string') {
-                // res.status(400);
-                throw new Error("'newEmail' deve ser string");
+                throw new BadRequestError("'newEmail' deve ser string");
             }
         }
 
         if (newPassword !== undefined) {
             if (typeof newPassword !== 'string') {
-                // res.status(400);
-                throw new Error("'newPassword' deve ser string");
+                throw new BadRequestError("'newPassword' deve ser string");
             }
         }
 
         if (newRole !== undefined) {
             if (typeof newRole !== 'string') {
-                // res.status(400);
-                throw new Error("'newRole' deve ser string");
+                throw new BadRequestError("'newRole' deve ser string");
             }
         }
 
         if (newCreatedAt !== undefined) {
             if (typeof newCreatedAt !== 'string') {
                 // res.status(400);
-                throw new Error("'newCreatedAt' deve ser string");
+                throw new BadRequestError("'newCreatedAt' deve ser string");
             }
         }
 
@@ -197,8 +186,7 @@ export class UserBusiness {
         const userDBExists = await userDatabase.findUserById(id);
 
         if (!userDBExists) {
-            // res.status(400);
-            throw new Error("'id' não existe");
+            throw new BadRequestError("'id' não existe");
         }
 
         const user = new User(

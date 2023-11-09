@@ -1,7 +1,8 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
-import { UserController } from './controller/UserController';
-import { PostController } from './controller/PostController';
+// import { UserController } from './controller/UserController';
+// import { PostController } from './controller/PostController';
+import { userRouter } from './router/userRouter';
 
 const app = express();
 app.use(cors());
@@ -32,33 +33,37 @@ app.get('/ping', async (req: Request, res: Response) => {
 
 // --> INSTÂNCIAS <--
 
-const userController = new UserController();
-const postController = new PostController();
+// const userController = new UserController();
+// const postController = new PostController();
 
 // --> USERS <--
 
+app.use('/users', userRouter);
+
 // GET:
-app.get('/users', userController.getUsers);
+// app.get('/users', userController.getUsers);
 
 // POST:
-app.post('/users', userController.createUser);
+// app.post('/users', userController.createUser);
 
 // PUT:
-app.put('/users/:id', userController.updateUser);
+// app.put('/users/:id', userController.updateUser);
 
 // DELETE:
-app.delete('/users/:id', userController.deleteUser);
+// app.delete('/users/:id', userController.deleteUser);
 
 // --> POSTS <--
 
+app.use('/posts', userRouter);
+
 // GET:
-app.get('/posts', postController.getPosts);
+// app.get('/posts', postController.getPosts);
 
 // POST:
-app.post('/posts', postController.createPost);
+// app.post('/posts', postController.createPost);
 
 // PUT:
-app.put('/posts/:id', postController.updatePost);
+// app.put('/posts/:id', postController.updatePost);
 
 // DELETE:
-app.delete('/posts/:id', postController.deletePost);
+// app.delete('/posts/:id', postController.deletePost);

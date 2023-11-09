@@ -2,6 +2,7 @@ import { format } from 'date-fns';
 import { PostDatabase } from '../database/PostDatabase';
 import { Post } from '../models/Post';
 import { TPost } from '../types';
+import { BadRequestError } from '../errors/BadRequestError';
 
 export class PostBusiness {
     // GET
@@ -33,36 +34,30 @@ export class PostBusiness {
         const { id, creatorId, content, likes, dislikes } = input;
 
         if (typeof id !== 'string') {
-            // res.status(400);
-            throw new Error("'id' deve ser string");
+            throw new BadRequestError("'id' deve ser string");
         }
 
         if (typeof creatorId !== 'string') {
-            // res.status(400);
-            throw new Error("'creatorId' deve ser string");
+            throw new BadRequestError("'creatorId' deve ser string");
         }
 
         if (typeof content !== 'string') {
-            // res.status(400);
-            throw new Error("'content' deve ser string");
+            throw new BadRequestError("'content' deve ser string");
         }
 
         if (typeof likes !== 'number') {
-            // res.status(400);
-            throw new Error("'likes' deve ser number");
+            throw new BadRequestError("'likes' deve ser number");
         }
 
         if (typeof dislikes !== 'number') {
-            // res.status(400);
-            throw new Error("'dislikes' deve ser number");
+            throw new BadRequestError("'dislikes' deve ser number");
         }
 
         const postDatabase = new PostDatabase();
         const postDBExists = await postDatabase.findPostById(id);
 
         if (postDBExists) {
-            // res.status(400);
-            throw new Error("'id' já existe");
+            throw new BadRequestError("'id' já existe");
         }
 
         const post = new Post(
@@ -112,8 +107,7 @@ export class PostBusiness {
         const postDBExists = await postDatabase.findPostById(id);
 
         if (!postDBExists) {
-            // res.status(400);
-            throw new Error("'id' não encontrado");
+            throw new BadRequestError("'id' não encontrado");
         }
 
         const post = new Post(
@@ -128,50 +122,43 @@ export class PostBusiness {
 
         if (newId !== undefined) {
             if (typeof newId !== 'string') {
-                // res.status(400);
-                throw new Error("'id' deve ser string");
+                throw new BadRequestError("'id' deve ser string");
             }
         }
 
         if (newCreatorId !== undefined) {
             if (typeof newCreatorId !== 'string') {
-                // res.status(400);
-                throw new Error("'creatorId' deve ser string");
+                throw new BadRequestError("'creatorId' deve ser string");
             }
         }
 
         if (newContent !== undefined) {
             if (typeof newContent !== 'string') {
-                // res.status(400);
-                throw new Error("'content' deve ser string");
+                throw new BadRequestError("'content' deve ser string");
             }
         }
 
         if (newLikes !== undefined) {
             if (typeof newLikes !== 'number') {
-                // res.status(400);
-                throw new Error("'likes' deve ser number");
+                throw new BadRequestError("'likes' deve ser number");
             }
         }
 
         if (newDislikes !== undefined) {
             if (typeof newDislikes !== 'number') {
-                // res.status(400);
-                throw new Error("'dislikes' deve ser number");
+                throw new BadRequestError("'dislikes' deve ser number");
             }
         }
 
         if (newCreatedAt !== undefined) {
             if (typeof newCreatedAt !== 'string') {
-                // res.status(400);
-                throw new Error("'createdAt' deve ser string");
+                throw new BadRequestError("'createdAt' deve ser string");
             }
         }
 
         if (newUpdatedAt !== undefined) {
             if (typeof newUpdatedAt !== 'string') {
-                // res.status(400);
-                throw new Error("'updatedAt' deve ser string");
+                throw new BadRequestError("'updatedAt' deve ser string");
             }
         }
 
@@ -211,8 +198,7 @@ export class PostBusiness {
         const postDBExists = await postDatabase.findPostById(id);
 
         if (!postDBExists) {
-            // res.status(400);
-            throw new Error("'id' não existe");
+            throw new BadRequestError("'id' não existe");
         }
 
         // PRECISA MESMO INTANCIAR????
