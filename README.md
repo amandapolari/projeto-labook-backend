@@ -5,6 +5,12 @@
 -   [Resumo do Projeto](#resumo-do-projeto)
 -   [Tecnologias e conteúdos utilizados](#tecnologias-e-conteúdos-utilizados)
 
+## PENDÊNCIAS
+
+**ARQUITETURA III:**
+
+[ ] Fazer dto para TODOS os endpoints de TODAS as entidades e refatorar o Controllers e a Business de cada um deles
+
 ## Resumo do Projeto
 
 [🔼](#índice)

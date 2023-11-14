@@ -1,3 +1,4 @@
+// TIPAR MELHOR ESSE ARQUIVO
 import { TUser } from '../types';
 import { BaseDatabase } from './BaseDatabase';
 
@@ -30,6 +31,14 @@ export class UserDatabase extends BaseDatabase {
         const [userDB]: TUser[] = await BaseDatabase.connection(
             UserDatabase.TABLE_USERS
         ).where({ id });
+
+        return userDB;
+    }
+
+    public async findUserByEmail(email: string) {
+        const [userDB] = await BaseDatabase.connection(
+            UserDatabase.TABLE_USERS
+        ).where({ email });
 
         return userDB;
     }
