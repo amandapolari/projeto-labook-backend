@@ -3,9 +3,14 @@ import { UserDatabase } from '../database/UserDatabase';
 import { User } from '../models/User';
 import { TUser } from '../types';
 import { BadRequestError } from '../errors/BadRequestError';
+import { SignupInputDTO, SignupOutputDTO } from '../dtos/users/signupDto';
+import { LoginInputDTO, LoginOutputDTO } from '../dtos/users/loginDto';
+import { NotFoundError } from '../errors/NotFoundError';
 
 export class UserBusiness {
-    // GET
+    constructor(private userDatabase: UserDatabase) {}
+
+    // GET => APENAS PARA AJUDAR A CODIFICAR | NÃO TEM ARQUITETURA APLICADA
     public getUsers = async (input: any) => {
         const { q } = input;
 
@@ -28,29 +33,9 @@ export class UserBusiness {
         return output;
     };
 
-    // POST
-    public createUser = async (input: any) => {
-        const { id, name, email, password, role } = input;
-
-        if (typeof id !== 'string') {
-            throw new BadRequestError("'id' deve ser string");
-        }
-
-        if (typeof name !== 'string') {
-            throw new BadRequestError("'name' deve ser string");
-        }
-
-        if (typeof email !== 'string') {
-            throw new BadRequestError("'email' deve ser string");
-        }
-
-        if (typeof password !== 'string') {
-            throw new BadRequestError("'password' deve ser string");
-        }
-
-        if (typeof role !== 'string') {
-            throw new BadRequestError("'role' deve ser string");
-        }
+    // SIGNUP (OBRIGATÓRIO)
+    public signup = async (input: SignupInputDTO): Promise<SignupOutputDTO> => {
+        const { id, name, email, password } = input;
 
         const userDatabase = new UserDatabase();
         const userDBExists = await userDatabase.findUserById(id);
@@ -64,7 +49,7 @@ export class UserBusiness {
             name,
             email,
             password,
-            role,
+            'NORMAL',
             format(new Date(), 'dd-MM-yyyy HH:mm:ss')
         );
 
@@ -79,15 +64,46 @@ export class UserBusiness {
 
         await userDatabase.insertUser(newUser);
 
-        const output = {
+        const output: SignupOutputDTO = {
             message: 'Usuário criado com sucesso',
-            user: user,
+            token: 'token',
         };
 
         return output;
     };
 
-    // UPDATE
+    // LOGIN (OBRIGATÓRIO)
+    public login = async (input: LoginInputDTO): Promise<LoginOutputDTO> => {
+        const { email, password } = input;
+
+        const userDB = await this.userDatabase.findUserByEmail(email);
+
+        if (!userDB) {
+            throw new NotFoundError("'email' não encontrado");
+        }
+
+        if (password !== userDB.password) {
+            throw new BadRequestError("'email' ou 'password' incorretos");
+        }
+
+        const user = new User(
+            userDB.id,
+            userDB.name,
+            userDB.email,
+            userDB.password,
+            userDB.role,
+            userDB.created_at
+        );
+
+        const output: LoginOutputDTO = {
+            message: 'Login realizado com sucesso',
+            token: 'token',
+        };
+
+        return output;
+    };
+
+    // UPDATE => APENAS PARA AJUDAR A CODIFICAR | NÃO TEM ARQUITETURA APLICADA
     public updateUser = async (input: any) => {
         const {
             id,
@@ -178,7 +194,7 @@ export class UserBusiness {
         return output;
     };
 
-    // DELETE
+    // DELETE => APENAS PARA AJUDAR A CODIFICAR | NÃO TEM ARQUITETURA APLICADA
     public deleteUser = async (input: any) => {
         const { id } = input;
 
