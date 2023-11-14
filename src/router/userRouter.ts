@@ -15,5 +15,3 @@ userRouter.post('/signup', userController.signup);
 userRouter.get('/', userController.getUsers);
 userRouter.put('/:id', userController.updateUser);
 userRouter.delete('/:id', userController.deleteUser);
-
-// posts
