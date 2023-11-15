@@ -2,10 +2,13 @@ import express from 'express';
 import { UserController } from '../controller/UserController';
 import { UserDatabase } from '../database/UserDatabase';
 import { UserBusiness } from '../business/UserBusiness';
+import { IdGenerator } from '../services/IdGenerator';
 
 export const userRouter = express.Router();
 
-const userController = new UserController(new UserBusiness(new UserDatabase()));
+const userController = new UserController(
+    new UserBusiness(new UserDatabase(), new IdGenerator())
+);
 
 // users
 userRouter.post('/login', userController.login);

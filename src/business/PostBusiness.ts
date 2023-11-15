@@ -1,18 +1,23 @@
 import { format } from 'date-fns';
 import { PostDatabase } from '../database/PostDatabase';
-import { Post } from '../models/Post';
-import { TPost } from '../types';
+import { Post, PostDB } from '../models/Post';
 import { BadRequestError } from '../errors/BadRequestError';
+import { IdGenerator } from '../services/IdGenerator';
 
 export class PostBusiness {
+    constructor(
+        private postDatabase: PostDatabase,
+        private idGenerator: IdGenerator
+    ) {}
     // GET
     public getPosts = async (input: any) => {
         const { q } = input;
 
-        const postDataBase = new PostDatabase();
-        const postsDB = await postDataBase.findPosts(q as string | undefined);
+        const postsDB = await this.postDatabase.findPosts(
+            q as string | undefined
+        );
 
-        const posts: Post[] = postsDB.map((post: TPost) => {
+        const posts: Post[] = postsDB.map((post: PostDB) => {
             return new Post(
                 post.id,
                 post.creator_id,
@@ -31,63 +36,44 @@ export class PostBusiness {
 
     // POST
     public createPost = async (input: any) => {
-        const { id, creatorId, content, likes, dislikes } = input;
+        const { token, content } = input;
 
-        if (typeof id !== 'string') {
-            throw new BadRequestError("'id' deve ser string");
-        }
+        // Quando tiver token, descomentar:
+        // const postDBExists = await this.postDatabase.findPostById(id);
 
-        if (typeof creatorId !== 'string') {
-            throw new BadRequestError("'creatorId' deve ser string");
-        }
+        // if (postDBExists) {
+        //     throw new BadRequestError("'id' já existe");
+        // }
 
-        if (typeof content !== 'string') {
-            throw new BadRequestError("'content' deve ser string");
-        }
+        // const post = new Post(
+        //     id,
+        //     creatorId,
+        //     content,
+        //     likes,
+        //     dislikes,
+        //     format(new Date(), 'dd-MM-yyyy HH:mm:ss'),
+        //     format(new Date(), 'dd-MM-yyyy HH:mm:ss')
+        // );
 
-        if (typeof likes !== 'number') {
-            throw new BadRequestError("'likes' deve ser number");
-        }
+        // const newPost: PostDB = {
+        //     id: post.getId(),
+        //     creator_id: post.getCreatedId(),
+        //     content: post.getContent(),
+        //     likes: post.getLikes(),
+        //     dislikes: post.getDislikes(),
+        //     created_at: post.getCreatedAt(),
+        //     updated_at: post.getUpdatedAt(),
+        // };
 
-        if (typeof dislikes !== 'number') {
-            throw new BadRequestError("'dislikes' deve ser number");
-        }
+        // await postDatabase.insertPost(newPost);
+        // await this.postDatabase.insertPost(newPost);
 
-        const postDatabase = new PostDatabase();
-        const postDBExists = await postDatabase.findPostById(id);
+        // const output = {
+        //     message: 'Post criado com sucesso',
+        //     post: post,
+        // };
 
-        if (postDBExists) {
-            throw new BadRequestError("'id' já existe");
-        }
-
-        const post = new Post(
-            id,
-            creatorId,
-            content,
-            likes,
-            dislikes,
-            format(new Date(), 'dd-MM-yyyy HH:mm:ss'),
-            format(new Date(), 'dd-MM-yyyy HH:mm:ss')
-        );
-
-        const newPost: TPost = {
-            id: post.getId(),
-            creator_id: post.getCreatedId(),
-            content: post.getContent(),
-            likes: post.getLikes(),
-            dislikes: post.getDislikes(),
-            created_at: post.getCreatedAt(),
-            updated_at: post.getUpdatedAt(),
-        };
-
-        await postDatabase.insertPost(newPost);
-
-        const output = {
-            message: 'Post criado com sucesso',
-            post: post,
-        };
-
-        return output;
+        // return output;
     };
 
     // UPDATE
@@ -103,8 +89,7 @@ export class PostBusiness {
             newUpdatedAt,
         } = input;
 
-        const postDatabase = new PostDatabase();
-        const postDBExists = await postDatabase.findPostById(id);
+        const postDBExists = await this.postDatabase.findPostById(id);
 
         if (!postDBExists) {
             throw new BadRequestError("'id' não encontrado");
@@ -170,7 +155,7 @@ export class PostBusiness {
         newCreatedAt && post.setCreatedAt(newCreatedAt);
         newUpdatedAt && post.setUpdatedAt(newUpdatedAt);
 
-        const newPost: TPost = {
+        const newPost: PostDB = {
             id: post.getId(),
             creator_id: post.getCreatedId(),
             content: post.getContent(),
@@ -180,7 +165,7 @@ export class PostBusiness {
             updated_at: post.getUpdatedAt(),
         };
 
-        await postDatabase.updatePostById(id, newPost);
+        await this.postDatabase.updatePostById(id, newPost);
 
         const output = {
             message: 'Post atualizado com sucesso',
@@ -194,14 +179,12 @@ export class PostBusiness {
     public deletePost = async (input: any) => {
         const { id } = input;
 
-        const postDatabase = new PostDatabase();
-        const postDBExists = await postDatabase.findPostById(id);
+        const postDBExists = await this.postDatabase.findPostById(id);
 
         if (!postDBExists) {
             throw new BadRequestError("'id' não existe");
         }
 
-        // PRECISA MESMO INTANCIAR????
         const post = new Post(
             postDBExists.id,
             postDBExists.creator_id,
@@ -212,7 +195,7 @@ export class PostBusiness {
             postDBExists.updated_at
         );
 
-        await postDatabase.deletePostById(id);
+        await this.postDatabase.deletePostById(id);
 
         const output = {
             message: 'Post deletado com sucesso',

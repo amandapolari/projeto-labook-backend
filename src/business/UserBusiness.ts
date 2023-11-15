@@ -1,23 +1,27 @@
 import { format } from 'date-fns';
 import { UserDatabase } from '../database/UserDatabase';
-import { User } from '../models/User';
-import { TUser } from '../types';
+import { USER_ROLES, User, UserDB } from '../models/User';
 import { BadRequestError } from '../errors/BadRequestError';
 import { SignupInputDTO, SignupOutputDTO } from '../dtos/users/signupDto';
 import { LoginInputDTO, LoginOutputDTO } from '../dtos/users/loginDto';
 import { NotFoundError } from '../errors/NotFoundError';
+import { IdGenerator } from '../services/IdGenerator';
 
 export class UserBusiness {
-    constructor(private userDatabase: UserDatabase) {}
+    constructor(
+        private userDatabase: UserDatabase,
+        private idGenerator: IdGenerator
+    ) {}
 
     // GET => APENAS PARA AJUDAR A CODIFICAR | NÃO TEM ARQUITETURA APLICADA
     public getUsers = async (input: any) => {
         const { q } = input;
 
-        const userDatabase = new UserDatabase();
-        const usersDB = await userDatabase.findUsers(q as string | undefined);
+        const usersDB = await this.userDatabase.findUsers(
+            q as string | undefined
+        );
 
-        const users: User[] = usersDB.map((user: TUser) => {
+        const users: User[] = usersDB.map((user: UserDB) => {
             return new User(
                 user.id,
                 user.name,
@@ -35,10 +39,11 @@ export class UserBusiness {
 
     // SIGNUP (OBRIGATÓRIO)
     public signup = async (input: SignupInputDTO): Promise<SignupOutputDTO> => {
-        const { id, name, email, password } = input;
+        const { name, email, password } = input;
 
-        const userDatabase = new UserDatabase();
-        const userDBExists = await userDatabase.findUserById(id);
+        const id = this.idGenerator.generate();
+
+        const userDBExists = await this.userDatabase.findUserById(id);
 
         if (userDBExists) {
             throw new BadRequestError("'id' já existe");
@@ -49,11 +54,11 @@ export class UserBusiness {
             name,
             email,
             password,
-            'NORMAL',
+            USER_ROLES.NORMAL,
             format(new Date(), 'dd-MM-yyyy HH:mm:ss')
         );
 
-        const newUser: TUser = {
+        const newUser: UserDB = {
             id: user.getId(),
             name: user.getName(),
             email: user.getEmail(),
@@ -62,7 +67,7 @@ export class UserBusiness {
             created_at: user.getUpdatedAt(),
         };
 
-        await userDatabase.insertUser(newUser);
+        await this.userDatabase.insertUser(newUser);
 
         const output: SignupOutputDTO = {
             message: 'Usuário criado com sucesso',
@@ -115,8 +120,7 @@ export class UserBusiness {
             newCreatedAt,
         } = input;
 
-        const userDatabase = new UserDatabase();
-        const userDBExists = await userDatabase.findUserById(id);
+        const userDBExists = await this.userDatabase.findUserById(id);
 
         if (!userDBExists) {
             throw new BadRequestError("'id' não encontrado");
@@ -175,7 +179,7 @@ export class UserBusiness {
         newRole && user.setRole(newRole);
         newCreatedAt && user.setUpdatedAt(newCreatedAt);
 
-        const newUser: TUser = {
+        const newUser: UserDB = {
             id: user.getId(),
             name: user.getName(),
             email: user.getEmail(),
@@ -184,7 +188,7 @@ export class UserBusiness {
             created_at: user.getUpdatedAt(),
         };
 
-        await userDatabase.updateUserById(id, newUser);
+        await this.userDatabase.updateUserById(id, newUser);
 
         const output = {
             message: 'Usuário atualizado com sucesso',
@@ -198,8 +202,7 @@ export class UserBusiness {
     public deleteUser = async (input: any) => {
         const { id } = input;
 
-        const userDatabase = new UserDatabase();
-        const userDBExists = await userDatabase.findUserById(id);
+        const userDBExists = await this.userDatabase.findUserById(id);
 
         if (!userDBExists) {
             throw new BadRequestError("'id' não existe");
@@ -214,7 +217,7 @@ export class UserBusiness {
             userDBExists.created_at
         );
 
-        await userDatabase.deleteUserById(user.getId());
+        await this.userDatabase.deleteUserById(id);
 
         const output = {
             message: 'Usuário deletado com sucesso',
