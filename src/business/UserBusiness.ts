@@ -17,7 +17,19 @@ export class UserBusiness {
 
     // GET => APENAS PARA AJUDAR A CODIFICAR | NÃO TEM ARQUITETURA APLICADA
     public getUsers = async (input: any) => {
-        const { q } = input;
+        const { q, token } = input;
+
+        const payload = this.tokenManager.getPayload(token);
+
+        if (payload === null) {
+            throw new BadRequestError('token inválido');
+        }
+
+        if (payload.role !== USER_ROLES.ADMIN) {
+            throw new BadRequestError(
+                'Somente administradores podem acessar essa funcionalidade'
+            );
+        }
 
         const usersDB = await this.userDatabase.findUsers(
             q as string | undefined
@@ -57,6 +69,8 @@ export class UserBusiness {
             email,
             password,
             USER_ROLES.NORMAL,
+            // Somente para teste:
+            // USER_ROLES.ADMIN,
             format(new Date(), 'dd-MM-yyyy HH:mm:ss')
         );
 
