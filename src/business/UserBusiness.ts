@@ -98,7 +98,7 @@ export class UserBusiness {
         const token = this.tokenManager.createToken(payload);
 
         const output: SignupOutputDTO = {
-            message: 'Usuário criado com sucesso',
+            message: 'Usuário cadastrado com sucesso',
             token: token,
         };
 

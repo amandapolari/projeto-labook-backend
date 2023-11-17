@@ -13,13 +13,13 @@ export class UserDatabase extends BaseDatabase {
                 UserDatabase.TABLE_USERS
             )
                 .where('name', 'LIKE', `%${q}%`)
-                .orderBy('id', 'ASC');
+                .orderBy('name', 'ASC');
 
             usersDB = result;
         } else {
             const result: UserDB[] = await BaseDatabase.connection(
                 UserDatabase.TABLE_USERS
-            ).orderBy('id', 'ASC');
+            ).orderBy('name', 'ASC');
 
             usersDB = result;
         }

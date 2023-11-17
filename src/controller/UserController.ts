@@ -30,7 +30,7 @@ export class UserController {
         }
     };
 
-    // LOGIN (OBRIGATÓRIO)
+    // SIGNUP (OBRIGATÓRIO)
     public signup = async (req: Request, res: Response) => {
         try {
             const input = SignupSchema.parse({

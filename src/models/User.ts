@@ -21,7 +21,6 @@ export enum USER_ROLES {
     ADMIN = 'ADMIN',
 }
 
-// TokenPayload -> É objeto que guarda as informações do token
 export interface TokenPayload {
     id: string;
     name: string;

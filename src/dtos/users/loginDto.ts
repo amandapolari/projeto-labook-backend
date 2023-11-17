@@ -1,5 +1,3 @@
-// (OBRIGATÓRIO)
-
 import z from 'zod';
 
 export interface LoginInputDTO {

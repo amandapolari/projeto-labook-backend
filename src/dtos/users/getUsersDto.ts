@@ -1,5 +1,3 @@
-// (OBRIGATÓRIO)
-
 import z from 'zod';
 import { UserModel } from '../../models/User';
 
@@ -14,7 +12,6 @@ export const GetUsersSchema = z
     .object({
         q: z
             .string({
-                required_error: "'q' é obrigatório",
                 invalid_type_error: "'q' deve ser do tipo string",
             })
             .optional(),
