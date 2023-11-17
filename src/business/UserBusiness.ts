@@ -1,23 +1,43 @@
 import { format } from 'date-fns';
 import { UserDatabase } from '../database/UserDatabase';
-import { User } from '../models/User';
-import { TUser } from '../types';
+import { TokenPayload, USER_ROLES, User, UserDB } from '../models/User';
 import { BadRequestError } from '../errors/BadRequestError';
 import { SignupInputDTO, SignupOutputDTO } from '../dtos/users/signupDto';
 import { LoginInputDTO, LoginOutputDTO } from '../dtos/users/loginDto';
 import { NotFoundError } from '../errors/NotFoundError';
+import { IdGenerator } from '../services/IdGenerator';
+import { TokenManager } from '../services/TokenManager';
+import { HashManager } from '../services/HashManager';
 
 export class UserBusiness {
-    constructor(private userDatabase: UserDatabase) {}
+    constructor(
+        private userDatabase: UserDatabase,
+        private idGenerator: IdGenerator,
+        private tokenManager: TokenManager,
+        private hashManager: HashManager
+    ) {}
 
     // GET => APENAS PARA AJUDAR A CODIFICAR | NÃO TEM ARQUITETURA APLICADA
     public getUsers = async (input: any) => {
-        const { q } = input;
+        const { q, token } = input;
 
-        const userDatabase = new UserDatabase();
-        const usersDB = await userDatabase.findUsers(q as string | undefined);
+        const payload = this.tokenManager.getPayload(token);
 
-        const users: User[] = usersDB.map((user: TUser) => {
+        if (payload === null) {
+            throw new BadRequestError('token inválido');
+        }
+
+        if (payload.role !== USER_ROLES.ADMIN) {
+            throw new BadRequestError(
+                'Somente administradores podem acessar essa funcionalidade'
+            );
+        }
+
+        const usersDB = await this.userDatabase.findUsers(
+            q as string | undefined
+        );
+
+        const users: User[] = usersDB.map((user: UserDB) => {
             return new User(
                 user.id,
                 user.name,
@@ -35,25 +55,30 @@ export class UserBusiness {
 
     // SIGNUP (OBRIGATÓRIO)
     public signup = async (input: SignupInputDTO): Promise<SignupOutputDTO> => {
-        const { id, name, email, password } = input;
+        const { name, email, password } = input;
 
-        const userDatabase = new UserDatabase();
-        const userDBExists = await userDatabase.findUserById(id);
+        const id = this.idGenerator.generate();
+
+        const userDBExists = await this.userDatabase.findUserById(id);
 
         if (userDBExists) {
             throw new BadRequestError("'id' já existe");
         }
 
+        const hashPassword = await this.hashManager.hash(password);
+
         const user = new User(
             id,
             name,
             email,
-            password,
-            'NORMAL',
+            hashPassword,
+            // USER_ROLES.NORMAL,
+            // Somente para teste:
+            USER_ROLES.ADMIN,
             format(new Date(), 'dd-MM-yyyy HH:mm:ss')
         );
 
-        const newUser: TUser = {
+        const newUser: UserDB = {
             id: user.getId(),
             name: user.getName(),
             email: user.getEmail(),
@@ -62,11 +87,19 @@ export class UserBusiness {
             created_at: user.getUpdatedAt(),
         };
 
-        await userDatabase.insertUser(newUser);
+        await this.userDatabase.insertUser(newUser);
+
+        const payload: TokenPayload = {
+            id: user.getId(),
+            name: user.getName(),
+            role: user.getRole() as USER_ROLES,
+        };
+
+        const token = this.tokenManager.createToken(payload);
 
         const output: SignupOutputDTO = {
             message: 'Usuário criado com sucesso',
-            token: 'token',
+            token: token,
         };
 
         return output;
@@ -82,7 +115,17 @@ export class UserBusiness {
             throw new NotFoundError("'email' não encontrado");
         }
 
-        if (password !== userDB.password) {
+        // o password hasheado está no banco de dados
+        const hashedPassword = userDB.password;
+
+        // o serviço hashManager analisa o password do body (plaintext) e o hash
+        const isPasswordCorrect = await this.hashManager.compare(
+            password,
+            hashedPassword
+        );
+
+        // validamos o resultado
+        if (!isPasswordCorrect) {
             throw new BadRequestError("'email' ou 'password' incorretos");
         }
 
@@ -95,9 +138,17 @@ export class UserBusiness {
             userDB.created_at
         );
 
+        const payload: TokenPayload = {
+            id: user.getId(),
+            name: user.getName(),
+            role: user.getRole() as USER_ROLES,
+        };
+
+        const token = this.tokenManager.createToken(payload);
+
         const output: LoginOutputDTO = {
             message: 'Login realizado com sucesso',
-            token: 'token',
+            token: token,
         };
 
         return output;
@@ -115,8 +166,7 @@ export class UserBusiness {
             newCreatedAt,
         } = input;
 
-        const userDatabase = new UserDatabase();
-        const userDBExists = await userDatabase.findUserById(id);
+        const userDBExists = await this.userDatabase.findUserById(id);
 
         if (!userDBExists) {
             throw new BadRequestError("'id' não encontrado");
@@ -175,7 +225,7 @@ export class UserBusiness {
         newRole && user.setRole(newRole);
         newCreatedAt && user.setUpdatedAt(newCreatedAt);
 
-        const newUser: TUser = {
+        const newUser: UserDB = {
             id: user.getId(),
             name: user.getName(),
             email: user.getEmail(),
@@ -184,7 +234,7 @@ export class UserBusiness {
             created_at: user.getUpdatedAt(),
         };
 
-        await userDatabase.updateUserById(id, newUser);
+        await this.userDatabase.updateUserById(id, newUser);
 
         const output = {
             message: 'Usuário atualizado com sucesso',
@@ -198,8 +248,7 @@ export class UserBusiness {
     public deleteUser = async (input: any) => {
         const { id } = input;
 
-        const userDatabase = new UserDatabase();
-        const userDBExists = await userDatabase.findUserById(id);
+        const userDBExists = await this.userDatabase.findUserById(id);
 
         if (!userDBExists) {
             throw new BadRequestError("'id' não existe");
@@ -214,7 +263,7 @@ export class UserBusiness {
             userDBExists.created_at
         );
 
-        await userDatabase.deleteUserById(user.getId());
+        await this.userDatabase.deleteUserById(id);
 
         const output = {
             message: 'Usuário deletado com sucesso',

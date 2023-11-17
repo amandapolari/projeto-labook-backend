@@ -1,17 +1,17 @@
 import { Request, Response } from 'express';
 import { PostBusiness } from '../business/PostBusiness';
 import { BaseError } from '../errors/BaseError';
+import { CreatePostSchema } from '../dtos/posts/createPostDto';
 
 export class PostController {
+    constructor(private postBusiness: PostBusiness) {}
     // GET
     public getPosts = async (req: Request, res: Response) => {
         try {
             const input = {
                 q: req.query.q as string | undefined,
             };
-
-            const postBusiness = new PostBusiness();
-            const output = await postBusiness.getPosts(input);
+            const output = await this.postBusiness.getPosts(input);
 
             res.status(200).send(output);
         } catch (error) {
@@ -27,16 +27,12 @@ export class PostController {
     // POST
     public createPost = async (req: Request, res: Response) => {
         try {
-            const input = {
-                id: req.body.id as string,
-                creatorId: req.body.creatorId as string,
+            const input = CreatePostSchema.parse({
+                token: req.headers.authorization as string,
                 content: req.body.content as string,
-                likes: req.body.likes as number,
-                dislikes: req.body.dislikes as number,
-            };
+            });
 
-            const postBusiness = new PostBusiness();
-            const output = await postBusiness.createPost(input);
+            const output = await this.postBusiness.createPost(input);
 
             res.status(201).send(output);
         } catch (error) {
@@ -63,8 +59,7 @@ export class PostController {
                 newUpdatedAt: req.body.updatedAt as string,
             };
 
-            const postBusiness = new PostBusiness();
-            const output = await postBusiness.updatePost(input);
+            const output = await this.postBusiness.updatePost(input);
 
             res.status(200).send(output);
         } catch (error) {
@@ -84,8 +79,7 @@ export class PostController {
                 id: req.params.id,
             };
 
-            const postBusiness = new PostBusiness();
-            const output = await postBusiness.deletePost(input);
+            const output = await this.postBusiness.deletePost(input);
 
             res.status(200).send(output);
         } catch (error) {

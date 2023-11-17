@@ -1,4 +1,4 @@
-import { TPost } from '../types';
+import { PostDB } from '../models/Post';
 import { BaseDatabase } from './BaseDatabase';
 
 export class PostDatabase extends BaseDatabase {
@@ -8,7 +8,7 @@ export class PostDatabase extends BaseDatabase {
         let postsDB;
 
         if (q) {
-            const result: TPost[] = await BaseDatabase.connection(
+            const result: PostDB[] = await BaseDatabase.connection(
                 PostDatabase.TABLE_POSTS
             )
                 .where('content', 'LIKE', `%${q}%`)
@@ -16,7 +16,7 @@ export class PostDatabase extends BaseDatabase {
 
             postsDB = result;
         } else {
-            const result: TPost[] = await BaseDatabase.connection(
+            const result: PostDB[] = await BaseDatabase.connection(
                 PostDatabase.TABLE_POSTS
             ).orderBy('id', 'ASC');
 
@@ -26,21 +26,21 @@ export class PostDatabase extends BaseDatabase {
         return postsDB;
     }
 
-    public async findPostById(id: string): Promise<TPost> {
-        const [postDB]: TPost[] = await BaseDatabase.connection(
+    public async findPostById(id: string): Promise<PostDB> {
+        const [postDB]: PostDB[] = await BaseDatabase.connection(
             PostDatabase.TABLE_POSTS
         ).where({ id });
 
         return postDB;
     }
 
-    public async insertPost(newPostDB: TPost) {
+    public async insertPost(newPostDB: PostDB) {
         await BaseDatabase.connection(PostDatabase.TABLE_POSTS).insert(
             newPostDB
         );
     }
 
-    public async updatePostById(id: string, content: TPost): Promise<void> {
+    public async updatePostById(id: string, content: PostDB): Promise<void> {
         await BaseDatabase.connection(PostDatabase.TABLE_POSTS)
             .where({ id })
             .update(content);

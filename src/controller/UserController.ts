@@ -9,10 +9,12 @@ export class UserController {
     constructor(private userBusiness: UserBusiness) {}
 
     // GET => APENAS PARA AJUDAR A CODIFICAR | NÃO TEM ARQUITETURA APLICADA
+    // Apliquei dto para mostrar como seria receber token em getusers
     public getUsers = async (req: Request, res: Response) => {
         try {
             const input = {
                 q: req.query.q as string | undefined,
+                token: req.headers.authorization as string,
             };
 
             const output = await this.userBusiness.getUsers(input);
@@ -32,7 +34,6 @@ export class UserController {
     public signup = async (req: Request, res: Response) => {
         try {
             const input = SignupSchema.parse({
-                id: req.body.id as string,
                 name: req.body.name as string,
                 email: req.body.email as string,
                 password: req.body.password as string,

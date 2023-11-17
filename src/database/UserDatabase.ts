@@ -1,5 +1,5 @@
 // TIPAR MELHOR ESSE ARQUIVO
-import { TUser } from '../types';
+import { UserDB } from '../models/User'
 import { BaseDatabase } from './BaseDatabase';
 
 export class UserDatabase extends BaseDatabase {
@@ -9,7 +9,7 @@ export class UserDatabase extends BaseDatabase {
         let usersDB;
 
         if (q) {
-            const result: TUser[] = await BaseDatabase.connection(
+            const result: UserDB[] = await BaseDatabase.connection(
                 UserDatabase.TABLE_USERS
             )
                 .where('name', 'LIKE', `%${q}%`)
@@ -17,7 +17,7 @@ export class UserDatabase extends BaseDatabase {
 
             usersDB = result;
         } else {
-            const result: TUser[] = await BaseDatabase.connection(
+            const result: UserDB[] = await BaseDatabase.connection(
                 UserDatabase.TABLE_USERS
             ).orderBy('id', 'ASC');
 
@@ -27,8 +27,8 @@ export class UserDatabase extends BaseDatabase {
         return usersDB;
     }
 
-    public async findUserById(id: string): Promise<TUser> {
-        const [userDB]: TUser[] = await BaseDatabase.connection(
+    public async findUserById(id: string): Promise<UserDB> {
+        const [userDB]: UserDB[] = await BaseDatabase.connection(
             UserDatabase.TABLE_USERS
         ).where({ id });
 
@@ -43,13 +43,13 @@ export class UserDatabase extends BaseDatabase {
         return userDB;
     }
 
-    public async insertUser(newUserDB: TUser): Promise<void> {
+    public async insertUser(newUserDB: UserDB): Promise<void> {
         await BaseDatabase.connection(UserDatabase.TABLE_USERS).insert(
             newUserDB
         );
     }
 
-    public async updateUserById(id: string, content: TUser): Promise<void> {
+    public async updateUserById(id: string, content: UserDB): Promise<void> {
         await BaseDatabase.connection(UserDatabase.TABLE_USERS)
             .where({ id })
             .update(content);

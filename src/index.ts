@@ -1,14 +1,19 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
-// import { UserController } from './controller/UserController';
-// import { PostController } from './controller/PostController';
 import { userRouter } from './router/userRouter';
+import { postRouter } from './router/postRouter';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.listen(3003, () => {
-    console.log(`Servidor rodando na porta ${3003}`);
+
+const port = Number(process.env.PORT) || 3003;
+
+app.listen(port, () => {
+    console.log(`Servidor rodando na porta ${port}`);
 });
 
 // --> PING <--
@@ -31,39 +36,10 @@ app.get('/ping', async (req: Request, res: Response) => {
     }
 });
 
-// --> INSTÂNCIAS <--
-
-// const userController = new UserController();
-// const postController = new PostController();
-
 // --> USERS <--
 
 app.use('/users', userRouter);
 
-// GET:
-// app.get('/users', userController.getUsers);
-
-// POST:
-// app.post('/users', userController.createUser);
-
-// PUT:
-// app.put('/users/:id', userController.updateUser);
-
-// DELETE:
-// app.delete('/users/:id', userController.deleteUser);
-
 // --> POSTS <--
 
-app.use('/posts', userRouter);
-
-// GET:
-// app.get('/posts', postController.getPosts);
-
-// POST:
-// app.post('/posts', postController.createPost);
-
-// PUT:
-// app.put('/posts/:id', postController.updatePost);
-
-// DELETE:
-// app.delete('/posts/:id', postController.deletePost);
+app.use('/posts', postRouter);
