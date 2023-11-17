@@ -1,21 +1,32 @@
 import { format } from 'date-fns';
 import { PostDatabase } from '../database/PostDatabase';
-import { Post, PostDB } from '../models/Post';
+import { GetPost, Post, PostDB } from '../models/Post';
 import { BadRequestError } from '../errors/BadRequestError';
 import { IdGenerator } from '../services/IdGenerator';
+import { TokenManager } from '../services/TokenManager';
+import { UserDatabase } from '../database/UserDatabase';
 
 export class PostBusiness {
     constructor(
         private postDatabase: PostDatabase,
-        private idGenerator: IdGenerator
+        private userDatabase: UserDatabase,
+        private idGenerator: IdGenerator,
+        private tokenManager: TokenManager
     ) {}
+
     // GET
     public getPosts = async (input: any) => {
-        const { q } = input;
+        const { q, token } = input;
 
         const postsDB = await this.postDatabase.findPosts(
             q as string | undefined
         );
+
+        const payload = this.tokenManager.getPayload(token);
+
+        if (payload === null) {
+            throw new BadRequestError('token inválido');
+        }
 
         const posts: Post[] = postsDB.map((post: PostDB) => {
             return new Post(
@@ -29,51 +40,105 @@ export class PostBusiness {
             );
         });
 
-        const output = posts;
+        const usersDB = await this.userDatabase.findUsers(
+            q as string | undefined
+        );
+
+        const mapUserIdName = new Map();
+
+        usersDB.forEach((user: any) => {
+            mapUserIdName.set(user.id, user);
+        });
+
+        // console.log(mapUserIdName);
+
+        const output: GetPost[] = posts.map((post: Post) => {
+            const user = mapUserIdName.get(post.getCreatedId());
+            return {
+                id: post.getId(),
+                content: post.getContent(),
+                likes: post.getLikes(),
+                dislikes: post.getDislikes(),
+                createdAt: post.getCreatedAt(),
+                updatedAt: post.getUpdatedAt(),
+                creator: {
+                    id: user.id,
+                    name: user.name,
+                },
+            };
+        });
 
         return output;
     };
 
     // POST
     public createPost = async (input: any) => {
+        // Recebendo dados do input:
         const { token, content } = input;
 
-        // Quando tiver token, descomentar:
-        // const postDBExists = await this.postDatabase.findPostById(id);
+        // Gerando uuid:
+        const id = this.idGenerator.generate();
 
-        // if (postDBExists) {
-        //     throw new BadRequestError("'id' já existe");
-        // }
+        // Vericando se o id já existe:
+        const postDBExists = await this.postDatabase.findPostById(id);
 
-        // const post = new Post(
-        //     id,
-        //     creatorId,
-        //     content,
-        //     likes,
-        //     dislikes,
-        //     format(new Date(), 'dd-MM-yyyy HH:mm:ss'),
-        //     format(new Date(), 'dd-MM-yyyy HH:mm:ss')
-        // );
+        if (postDBExists) {
+            throw new BadRequestError("'id' já existe");
+        }
 
-        // const newPost: PostDB = {
-        //     id: post.getId(),
-        //     creator_id: post.getCreatedId(),
-        //     content: post.getContent(),
-        //     likes: post.getLikes(),
-        //     dislikes: post.getDislikes(),
-        //     created_at: post.getCreatedAt(),
-        //     updated_at: post.getUpdatedAt(),
-        // };
+        // Gerando uuid para post:
+        const payload = this.tokenManager.getPayload(token);
 
-        // await postDatabase.insertPost(newPost);
-        // await this.postDatabase.insertPost(newPost);
+        // testando o que vem no token:
+        /*
+        {
+        id: '073a07d0-56b5-4cc1-9b01-09db47f7f301',
+        name: 'Amanda',
+        role: 'ADMIN',
+        iat: 1700242436,
+        exp: 1700847236
+        }
+        */
+        // console.log(payload);
+        //--
 
-        // const output = {
-        //     message: 'Post criado com sucesso',
-        //     post: post,
-        // };
+        // Para garantir que o token é válido:
+        if (payload === null) {
+            throw new BadRequestError('token inválido');
+        }
 
-        // return output;
+        // Capturando o id do usuário que criou o post:
+        const idCreator = payload.id as string;
+
+        // Intanciando um novo post:
+        const post = new Post(
+            id,
+            idCreator,
+            content,
+            0,
+            0,
+            format(new Date(), 'dd-MM-yyyy HH:mm:ss'),
+            format(new Date(), 'dd-MM-yyyy HH:mm:ss')
+        );
+
+        const newPost: PostDB = {
+            id: post.getId(),
+            creator_id: post.getCreatedId(),
+            content: post.getContent(),
+            likes: post.getLikes(),
+            dislikes: post.getDislikes(),
+            created_at: post.getCreatedAt(),
+            updated_at: post.getUpdatedAt(),
+        };
+
+        await this.postDatabase.insertPost(newPost);
+
+        const output = {
+            message: 'Post criado com sucesso',
+            post: content,
+        };
+
+        return output;
     };
 
     // UPDATE

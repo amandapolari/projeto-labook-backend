@@ -23,6 +23,17 @@ export class UserBusiness {
 
         const payload = this.tokenManager.getPayload(token);
 
+        // console.log(payload);
+        /*
+        {
+        id: '073a07d0-56b5-4cc1-9b01-09db47f7f301',
+        name: 'Amanda',
+        role: 'ADMIN',
+        iat: 1700241882,
+        exp: 1700846682
+        }
+        */
+
         if (payload === null) {
             throw new BadRequestError('token inválido');
         }

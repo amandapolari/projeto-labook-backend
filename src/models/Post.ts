@@ -14,8 +14,21 @@ export interface PostModel {
     content: string;
     likes: number;
     dislikes: number;
-    created_at: string;
+    createdAt: string;
     updatedAt: string;
+}
+
+export interface GetPost {
+    id: string;
+    content: string;
+    likes: number;
+    dislikes: number;
+    createdAt: string;
+    updatedAt: string;
+    creator: {
+        id: string;
+        name: string;
+    };
 }
 
 export class Post {

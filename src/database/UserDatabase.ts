@@ -1,5 +1,5 @@
 // TIPAR MELHOR ESSE ARQUIVO
-import { UserDB } from '../models/User'
+import { UserDB } from '../models/User';
 import { BaseDatabase } from './BaseDatabase';
 
 export class UserDatabase extends BaseDatabase {
@@ -41,6 +41,16 @@ export class UserDatabase extends BaseDatabase {
         ).where({ email });
 
         return userDB;
+    }
+
+    public async findNameById(id: string): Promise<string> {
+        const [nameDB]: string[] = await BaseDatabase.connection(
+            UserDatabase.TABLE_USERS
+        )
+            .select('name')
+            .where({ id });
+
+        return nameDB;
     }
 
     public async insertUser(newUserDB: UserDB): Promise<void> {

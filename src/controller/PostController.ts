@@ -2,15 +2,18 @@ import { Request, Response } from 'express';
 import { PostBusiness } from '../business/PostBusiness';
 import { BaseError } from '../errors/BaseError';
 import { CreatePostSchema } from '../dtos/posts/createPostDto';
+import { GetPostsSchema } from '../dtos/posts/getPostsDto';
 
 export class PostController {
     constructor(private postBusiness: PostBusiness) {}
+
     // GET
     public getPosts = async (req: Request, res: Response) => {
         try {
-            const input = {
+            const input = GetPostsSchema.parse({
                 q: req.query.q as string | undefined,
-            };
+                token: req.headers.authorization as string,
+            });
             const output = await this.postBusiness.getPosts(input);
 
             res.status(200).send(output);
