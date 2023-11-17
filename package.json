@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/amandapolari/projeto-labook-backend#readme",
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
     "@types/cors": "^2.8.15",
     "@types/express": "^4.17.20",
     "@types/jsonwebtoken": "^9.0.5",
@@ -30,6 +31,7 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "date-fns": "^2.30.0",
     "dotenv": "^16.3.1",

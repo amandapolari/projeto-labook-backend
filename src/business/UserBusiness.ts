@@ -7,12 +7,14 @@ import { LoginInputDTO, LoginOutputDTO } from '../dtos/users/loginDto';
 import { NotFoundError } from '../errors/NotFoundError';
 import { IdGenerator } from '../services/IdGenerator';
 import { TokenManager } from '../services/TokenManager';
+import { HashManager } from '../services/HashManager';
 
 export class UserBusiness {
     constructor(
         private userDatabase: UserDatabase,
         private idGenerator: IdGenerator,
-        private tokenManager: TokenManager
+        private tokenManager: TokenManager,
+        private hashManager: HashManager
     ) {}
 
     // GET => APENAS PARA AJUDAR A CODIFICAR | NÃO TEM ARQUITETURA APLICADA
@@ -63,14 +65,16 @@ export class UserBusiness {
             throw new BadRequestError("'id' já existe");
         }
 
+        const hashPassword = await this.hashManager.hash(password);
+
         const user = new User(
             id,
             name,
             email,
-            password,
-            USER_ROLES.NORMAL,
+            hashPassword,
+            // USER_ROLES.NORMAL,
             // Somente para teste:
-            // USER_ROLES.ADMIN,
+            USER_ROLES.ADMIN,
             format(new Date(), 'dd-MM-yyyy HH:mm:ss')
         );
 
@@ -111,7 +115,17 @@ export class UserBusiness {
             throw new NotFoundError("'email' não encontrado");
         }
 
-        if (password !== userDB.password) {
+        // o password hasheado está no banco de dados
+        const hashedPassword = userDB.password;
+
+        // o serviço hashManager analisa o password do body (plaintext) e o hash
+        const isPasswordCorrect = await this.hashManager.compare(
+            password,
+            hashedPassword
+        );
+
+        // validamos o resultado
+        if (!isPasswordCorrect) {
             throw new BadRequestError("'email' ou 'password' incorretos");
         }
 
