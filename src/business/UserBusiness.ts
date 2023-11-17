@@ -1,16 +1,18 @@
 import { format } from 'date-fns';
 import { UserDatabase } from '../database/UserDatabase';
-import { USER_ROLES, User, UserDB } from '../models/User';
+import { TokenPayload, USER_ROLES, User, UserDB } from '../models/User';
 import { BadRequestError } from '../errors/BadRequestError';
 import { SignupInputDTO, SignupOutputDTO } from '../dtos/users/signupDto';
 import { LoginInputDTO, LoginOutputDTO } from '../dtos/users/loginDto';
 import { NotFoundError } from '../errors/NotFoundError';
 import { IdGenerator } from '../services/IdGenerator';
+import { TokenManager } from '../services/TokenManager';
 
 export class UserBusiness {
     constructor(
         private userDatabase: UserDatabase,
-        private idGenerator: IdGenerator
+        private idGenerator: IdGenerator,
+        private tokenManager: TokenManager
     ) {}
 
     // GET => APENAS PARA AJUDAR A CODIFICAR | NÃO TEM ARQUITETURA APLICADA
@@ -69,9 +71,17 @@ export class UserBusiness {
 
         await this.userDatabase.insertUser(newUser);
 
+        const payload: TokenPayload = {
+            id: user.getId(),
+            name: user.getName(),
+            role: user.getRole() as USER_ROLES,
+        };
+
+        const token = this.tokenManager.createToken(payload);
+
         const output: SignupOutputDTO = {
             message: 'Usuário criado com sucesso',
-            token: 'token',
+            token: token,
         };
 
         return output;
@@ -100,9 +110,17 @@ export class UserBusiness {
             userDB.created_at
         );
 
+        const payload: TokenPayload = {
+            id: user.getId(),
+            name: user.getName(),
+            role: user.getRole() as USER_ROLES,
+        };
+
+        const token = this.tokenManager.createToken(payload);
+
         const output: LoginOutputDTO = {
             message: 'Login realizado com sucesso',
-            token: 'token',
+            token: token,
         };
 
         return output;

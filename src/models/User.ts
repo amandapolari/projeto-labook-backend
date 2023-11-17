@@ -21,6 +21,13 @@ export enum USER_ROLES {
     ADMIN = 'ADMIN',
 }
 
+// TokenPayload -> É objeto que guarda as informações do token
+export interface TokenPayload {
+    id: string;
+    name: string;
+    role: USER_ROLES;
+}
+
 export class User {
     constructor(
         protected id: string,
