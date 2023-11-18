@@ -23,7 +23,7 @@ CREATE TABLE
     )
 
 CREATE TABLE
-    likes_dislakes (
+    likes_dislikes (
         user_id TEXT NOT NULL,
         post_id TEXT NOT NULL,
         like INTEGER NOT NULL,

@@ -23,6 +23,17 @@ export class UserBusiness {
 
         const payload = this.tokenManager.getPayload(token);
 
+        // console.log(payload);
+        /*
+        {
+        id: '073a07d0-56b5-4cc1-9b01-09db47f7f301',
+        name: 'Amanda',
+        role: 'ADMIN',
+        iat: 1700241882,
+        exp: 1700846682
+        }
+        */
+
         if (payload === null) {
             throw new BadRequestError('token inválido');
         }
@@ -72,9 +83,9 @@ export class UserBusiness {
             name,
             email,
             hashPassword,
-            // USER_ROLES.NORMAL,
+            USER_ROLES.NORMAL,
             // Somente para teste:
-            USER_ROLES.ADMIN,
+            // USER_ROLES.ADMIN,
             format(new Date(), 'dd-MM-yyyy HH:mm:ss')
         );
 
@@ -98,7 +109,7 @@ export class UserBusiness {
         const token = this.tokenManager.createToken(payload);
 
         const output: SignupOutputDTO = {
-            message: 'Usuário criado com sucesso',
+            message: 'Usuário cadastrado com sucesso',
             token: token,
         };
 

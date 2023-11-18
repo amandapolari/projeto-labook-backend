@@ -1,21 +1,47 @@
 import { format } from 'date-fns';
 import { PostDatabase } from '../database/PostDatabase';
-import { Post, PostDB } from '../models/Post';
+import { GetPost, Post, PostDB } from '../models/Post';
 import { BadRequestError } from '../errors/BadRequestError';
 import { IdGenerator } from '../services/IdGenerator';
+import { TokenManager } from '../services/TokenManager';
+import { UserDatabase } from '../database/UserDatabase';
+import { GetPostsInputDTO } from '../dtos/posts/getPostsDto';
+import { CreateInputDTO } from '../dtos/posts/createPostDto';
+import {
+    UpdatePostInputDTO,
+    UpdatePostOutputDTO,
+} from '../dtos/posts/updatePostDto';
+import {
+    DeletePostInputDTO,
+    DeletePostOutputDTO,
+} from '../dtos/posts/deletePostDto';
+import {
+    LikeOrDislikeInputDTO,
+    LikeOrDislikeOutputDTO,
+} from '../dtos/posts/likeOrDislikeDto';
+import { NotFoundError } from '../errors/NotFoundError';
 
 export class PostBusiness {
     constructor(
         private postDatabase: PostDatabase,
-        private idGenerator: IdGenerator
+        private userDatabase: UserDatabase,
+        private idGenerator: IdGenerator,
+        private tokenManager: TokenManager
     ) {}
+
     // GET
-    public getPosts = async (input: any) => {
-        const { q } = input;
+    public getPosts = async (input: GetPostsInputDTO) => {
+        const { q, token } = input;
 
         const postsDB = await this.postDatabase.findPosts(
             q as string | undefined
         );
+
+        const payload = this.tokenManager.getPayload(token);
+
+        if (payload === null) {
+            throw new BadRequestError('token inválido');
+        }
 
         const posts: Post[] = postsDB.map((post: PostDB) => {
             return new Post(
@@ -29,70 +55,143 @@ export class PostBusiness {
             );
         });
 
-        const output = posts;
+        const usersDB = await this.userDatabase.findUsers(
+            q as string | undefined
+        );
+
+        const mapUserIdName = new Map();
+
+        usersDB.forEach((user: any) => {
+            mapUserIdName.set(user.id, user);
+        });
+
+        // console.log(mapUserIdName);
+
+        const output: GetPost[] = posts.map((post: Post) => {
+            const user = mapUserIdName.get(post.getCreatedId());
+            return {
+                id: post.getId(),
+                content: post.getContent(),
+                likes: post.getLikes(),
+                dislikes: post.getDislikes(),
+                createdAt: post.getCreatedAt(),
+                updatedAt: post.getUpdatedAt(),
+                creator: {
+                    id: user.id,
+                    name: user.name,
+                },
+            };
+        });
 
         return output;
     };
 
     // POST
-    public createPost = async (input: any) => {
+    public createPost = async (input: CreateInputDTO) => {
+        // Recebendo dados do input:
         const { token, content } = input;
 
-        // Quando tiver token, descomentar:
-        // const postDBExists = await this.postDatabase.findPostById(id);
+        // Gerando uuid:
+        const id = this.idGenerator.generate();
 
-        // if (postDBExists) {
-        //     throw new BadRequestError("'id' já existe");
-        // }
+        // Vericando se o id já existe:
+        const postDBExists = await this.postDatabase.findPostById(id);
 
-        // const post = new Post(
-        //     id,
-        //     creatorId,
-        //     content,
-        //     likes,
-        //     dislikes,
-        //     format(new Date(), 'dd-MM-yyyy HH:mm:ss'),
-        //     format(new Date(), 'dd-MM-yyyy HH:mm:ss')
-        // );
+        if (postDBExists) {
+            throw new BadRequestError("'id' já existe");
+        }
 
-        // const newPost: PostDB = {
-        //     id: post.getId(),
-        //     creator_id: post.getCreatedId(),
-        //     content: post.getContent(),
-        //     likes: post.getLikes(),
-        //     dislikes: post.getDislikes(),
-        //     created_at: post.getCreatedAt(),
-        //     updated_at: post.getUpdatedAt(),
-        // };
+        // Gerando uuid para post:
+        const payload = this.tokenManager.getPayload(token);
 
-        // await postDatabase.insertPost(newPost);
-        // await this.postDatabase.insertPost(newPost);
+        // testando o que vem no token:
+        /*
+        {
+        id: '073a07d0-56b5-4cc1-9b01-09db47f7f301',
+        name: 'Amanda',
+        role: 'ADMIN',
+        iat: 1700242436,
+        exp: 1700847236
+        }
+        */
+        // console.log(payload);
+        //--
 
-        // const output = {
-        //     message: 'Post criado com sucesso',
-        //     post: post,
-        // };
+        // Para garantir que o token é válido:
+        if (payload === null) {
+            throw new BadRequestError('token inválido');
+        }
 
-        // return output;
+        // Capturando o id do usuário que criou o post:
+        const idCreator = payload.id as string;
+
+        // Intanciando um novo post:
+        const post = new Post(
+            id,
+            idCreator,
+            content,
+            0,
+            0,
+            format(new Date(), 'dd-MM-yyyy HH:mm:ss'),
+            format(new Date(), 'dd-MM-yyyy HH:mm:ss')
+        );
+
+        const newPost: PostDB = {
+            id: post.getId(),
+            creator_id: post.getCreatedId(),
+            content: post.getContent(),
+            likes: post.getLikes(),
+            dislikes: post.getDislikes(),
+            created_at: post.getCreatedAt(),
+            updated_at: post.getUpdatedAt(),
+        };
+
+        await this.postDatabase.insertPost(newPost);
+
+        const output = {
+            message: 'Post criado com sucesso',
+            post: content,
+        };
+
+        return output;
     };
 
     // UPDATE
-    public updatePost = async (input: any) => {
-        const {
-            id,
-            newId,
-            newCreatorId,
-            newContent,
-            newLikes,
-            newDislikes,
-            newCreatedAt,
-            newUpdatedAt,
-        } = input;
+    public updatePost = async (
+        input: UpdatePostInputDTO
+    ): Promise<UpdatePostOutputDTO> => {
+        const { idToEdit, token, newContent } = input;
 
-        const postDBExists = await this.postDatabase.findPostById(id);
+        const payload = this.tokenManager.getPayload(token);
+
+        if (payload === null) {
+            throw new BadRequestError(
+                'É preciso um token válido para acessar essa funcionalidade'
+            );
+        }
+
+        const postDB: PostDB[] = await this.postDatabase.findAllPosts();
+
+        const mapPost = new Map();
+
+        postDB.forEach((post) => {
+            mapPost.set(post.id, post);
+        });
+
+        const postToEdit = mapPost.get(idToEdit);
+
+        if (postToEdit.creator_id !== payload.id) {
+            throw new BadRequestError(
+                'Você não tem permissão para editar este post'
+            );
+        }
+
+        const postDBExists = await this.postDatabase.findPostById(idToEdit);
 
         if (!postDBExists) {
-            throw new BadRequestError("'id' não encontrado");
+            throw new BadRequestError(
+                'Não foi encontrado nenhum post com id recebido'
+            );
         }
 
         const post = new Post(
@@ -105,55 +204,10 @@ export class PostBusiness {
             postDBExists.updated_at
         );
 
-        if (newId !== undefined) {
-            if (typeof newId !== 'string') {
-                throw new BadRequestError("'id' deve ser string");
-            }
-        }
+        const newDate = format(new Date(), 'dd-MM-yyyy HH:mm:ss');
 
-        if (newCreatorId !== undefined) {
-            if (typeof newCreatorId !== 'string') {
-                throw new BadRequestError("'creatorId' deve ser string");
-            }
-        }
-
-        if (newContent !== undefined) {
-            if (typeof newContent !== 'string') {
-                throw new BadRequestError("'content' deve ser string");
-            }
-        }
-
-        if (newLikes !== undefined) {
-            if (typeof newLikes !== 'number') {
-                throw new BadRequestError("'likes' deve ser number");
-            }
-        }
-
-        if (newDislikes !== undefined) {
-            if (typeof newDislikes !== 'number') {
-                throw new BadRequestError("'dislikes' deve ser number");
-            }
-        }
-
-        if (newCreatedAt !== undefined) {
-            if (typeof newCreatedAt !== 'string') {
-                throw new BadRequestError("'createdAt' deve ser string");
-            }
-        }
-
-        if (newUpdatedAt !== undefined) {
-            if (typeof newUpdatedAt !== 'string') {
-                throw new BadRequestError("'updatedAt' deve ser string");
-            }
-        }
-
-        newId && post.setId(newId);
-        newCreatorId && post.setCreatedId(newCreatorId);
         newContent && post.setContent(newContent);
-        newLikes && post.setLikes(newLikes);
-        newDislikes && post.setDislikes(newDislikes);
-        newCreatedAt && post.setCreatedAt(newCreatedAt);
-        newUpdatedAt && post.setUpdatedAt(newUpdatedAt);
+        post.setUpdatedAt(newDate);
 
         const newPost: PostDB = {
             id: post.getId(),
@@ -165,19 +219,55 @@ export class PostBusiness {
             updated_at: post.getUpdatedAt(),
         };
 
-        await this.postDatabase.updatePostById(id, newPost);
+        await this.postDatabase.updatePostById(
+            idToEdit,
+            newPost.content,
+            newPost.updated_at
+        );
 
-        const output = {
+        // console.log(idToEdit, newPost.content, newPost.updated_at);
+
+        const output: UpdatePostOutputDTO = {
             message: 'Post atualizado com sucesso',
-            post: post,
+            content: newPost.content,
         };
 
         return output;
     };
 
     // DELETE
-    public deletePost = async (input: any) => {
-        const { id } = input;
+    public deletePost = async (
+        input: DeletePostInputDTO
+    ): Promise<DeletePostOutputDTO> => {
+        const { id, token } = input;
+
+        // console.log(id, token);
+
+        const payload = this.tokenManager.getPayload(token);
+
+        if (payload === null) {
+            throw new BadRequestError(
+                'É preciso um token válido para acessar essa funcionalidade'
+            );
+        }
+
+        const postDB: PostDB[] = await this.postDatabase.findAllPosts();
+
+        const mapPost = new Map();
+
+        postDB.forEach((post) => {
+            mapPost.set(post.id, post);
+        });
+
+        const postToDelete = mapPost.get(id);
+
+        if (payload.role !== 'ADMIN') {
+            if (postToDelete.creator_id !== payload.id) {
+                throw new BadRequestError(
+                    'Você não tem permissão para deletar este post'
+                );
+            }
+        }
 
         const postDBExists = await this.postDatabase.findPostById(id);
 
@@ -197,11 +287,123 @@ export class PostBusiness {
 
         await this.postDatabase.deletePostById(id);
 
-        const output = {
+        const output: DeletePostOutputDTO = {
             message: 'Post deletado com sucesso',
-            post: post,
         };
 
         return output;
+    };
+
+    // LIKE E DISLAKE
+    public likeOrDislike = async (
+        input: LikeOrDislikeInputDTO
+    ): Promise<LikeOrDislikeOutputDTO> => {
+        const { idPost, token, like } = input;
+
+        const payload = this.tokenManager.getPayload(token);
+
+        if (payload === null) {
+            throw new BadRequestError(
+                'É preciso um token válido para acessar essa funcionalidade'
+            );
+        }
+
+        const userId = payload.id;
+
+        const postDB = await this.postDatabase.findPostById(idPost);
+
+        if (!postDB) {
+            throw new NotFoundError('Não existe post com o id fornecido');
+        }
+
+        const post = new Post(
+            postDB.id,
+            postDB.creator_id,
+            postDB.content,
+            postDB.likes,
+            postDB.dislikes,
+            postDB.created_at,
+            postDB.updated_at
+        );
+
+        if (postDB.creator_id === payload.id) {
+            throw new BadRequestError(
+                'Não é possível dar like ou dislike no seu próprio post'
+            );
+        }
+
+        const likeDislikeDB = await this.postDatabase.findLikeOrDislike(
+            userId,
+            post.getId()
+        );
+
+        const likeSqlite = like ? 1 : 0;
+
+        if (!likeDislikeDB) {
+            await this.postDatabase.createLikeDislike(
+                userId,
+                post.getId(),
+                likeSqlite
+            );
+
+            if (like) {
+                post.addLike();
+                await this.postDatabase.updateLikes(idPost, post.getLikes());
+            } else {
+                post.addDislike();
+
+                await this.postDatabase.updateDislikes(
+                    idPost,
+                    post.getDislikes()
+                );
+            }
+        } else if (likeDislikeDB.like) {
+            if (like) {
+                await this.postDatabase.removeLikeDislike(idPost, userId);
+                post.removeLike();
+
+                await this.postDatabase.updateLikes(idPost, post.getLikes());
+            } else {
+                await this.postDatabase.updateLikeDislike(
+                    idPost,
+                    userId,
+                    likeSqlite
+                );
+                post.removeLike();
+                post.addDislike();
+
+                await this.postDatabase.updateLikes(idPost, post.getLikes());
+                await this.postDatabase.updateDislikes(
+                    idPost,
+                    post.getDislikes()
+                );
+            }
+        } else {
+            if (!like) {
+                await this.postDatabase.removeLikeDislike(idPost, userId);
+                post.removeDislike();
+
+                await this.postDatabase.updateDislikes(
+                    idPost,
+                    post.getDislikes()
+                );
+            } else {
+                await this.postDatabase.updateLikeDislike(
+                    idPost,
+                    userId,
+                    likeSqlite
+                );
+                post.removeDislike();
+                post.addLike();
+
+                await this.postDatabase.updateLikes(idPost, post.getLikes());
+                await this.postDatabase.updateDislikes(
+                    idPost,
+                    post.getDislikes()
+                );
+            }
+        }
+
+        return;
     };
 }

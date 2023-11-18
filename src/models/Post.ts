@@ -14,8 +14,27 @@ export interface PostModel {
     content: string;
     likes: number;
     dislikes: number;
-    created_at: string;
+    createdAt: string;
     updatedAt: string;
+}
+
+export interface GetPost {
+    id: string;
+    content: string;
+    likes: number;
+    dislikes: number;
+    createdAt: string;
+    updatedAt: string;
+    creator: {
+        id: string;
+        name: string;
+    };
+}
+
+export interface LikeDislikeDB {
+    user_id: string;
+    video_id: string;
+    like: number;
 }
 
 export class Post {
@@ -83,5 +102,21 @@ export class Post {
 
     public setUpdatedAt(updatedAt: string): void {
         this.updatedAt = updatedAt;
+    }
+
+    public addLike(): void {
+        this.likes++;
+    }
+
+    public removeLike(): void {
+        this.likes--;
+    }
+
+    public addDislike(): void {
+        this.dislikes++;
+    }
+
+    public removeDislike(): void {
+        this.dislikes--;
     }
 }
