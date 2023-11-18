@@ -26,6 +26,14 @@ export class PostDatabase extends BaseDatabase {
         return postsDB;
     }
 
+    public async findAllPosts() {
+        const result: PostDB[] = await BaseDatabase.connection(
+            PostDatabase.TABLE_POSTS
+        ).orderBy('id', 'ASC');
+
+        return result;
+    }
+
     public async findPostById(id: string): Promise<PostDB> {
         const [postDB]: PostDB[] = await BaseDatabase.connection(
             PostDatabase.TABLE_POSTS
@@ -40,10 +48,20 @@ export class PostDatabase extends BaseDatabase {
         );
     }
 
-    public async updatePostById(id: string, content: PostDB): Promise<void> {
+    public async updatePostById(
+        id: string,
+        content: string,
+        updated_at: string
+    ): Promise<void> {
         await BaseDatabase.connection(PostDatabase.TABLE_POSTS)
             .where({ id })
-            .update(content);
+            .update({ content, updated_at });
+    }
+
+    public async updateDateById(id: string, updated_at: PostDB): Promise<void> {
+        await BaseDatabase.connection(PostDatabase.TABLE_POSTS)
+            .where({ id })
+            .update(updated_at);
     }
 
     public async deletePostById(id: string): Promise<void> {

@@ -5,6 +5,12 @@ import { BadRequestError } from '../errors/BadRequestError';
 import { IdGenerator } from '../services/IdGenerator';
 import { TokenManager } from '../services/TokenManager';
 import { UserDatabase } from '../database/UserDatabase';
+import { GetPostsInputDTO } from '../dtos/posts/getPostsDto';
+import { CreateInputDTO } from '../dtos/posts/createPostDto';
+import {
+    UpdatePostInputDTO,
+    UpdatePostOutputDTO,
+} from '../dtos/posts/updatePostDto';
 
 export class PostBusiness {
     constructor(
@@ -15,7 +21,7 @@ export class PostBusiness {
     ) {}
 
     // GET
-    public getPosts = async (input: any) => {
+    public getPosts = async (input: GetPostsInputDTO) => {
         const { q, token } = input;
 
         const postsDB = await this.postDatabase.findPosts(
@@ -72,7 +78,7 @@ export class PostBusiness {
     };
 
     // POST
-    public createPost = async (input: any) => {
+    public createPost = async (input: CreateInputDTO) => {
         // Recebendo dados do input:
         const { token, content } = input;
 
@@ -142,22 +148,41 @@ export class PostBusiness {
     };
 
     // UPDATE
-    public updatePost = async (input: any) => {
-        const {
-            id,
-            newId,
-            newCreatorId,
-            newContent,
-            newLikes,
-            newDislikes,
-            newCreatedAt,
-            newUpdatedAt,
-        } = input;
+    public updatePost = async (
+        input: UpdatePostInputDTO
+    ): Promise<UpdatePostOutputDTO> => {
+        const { idToEdit, token, newContent } = input;
 
-        const postDBExists = await this.postDatabase.findPostById(id);
+        const payload = this.tokenManager.getPayload(token);
+
+        if (payload === null) {
+            throw new BadRequestError(
+                'É preciso um token válido para acessar essa funcionalidade'
+            );
+        }
+
+        const postDB: PostDB[] = await this.postDatabase.findAllPosts();
+
+        const mapPost = new Map();
+
+        postDB.forEach((post) => {
+            mapPost.set(post.id, post);
+        });
+
+        const postToEdit = mapPost.get(idToEdit);
+
+        if (postToEdit.creator_id !== payload.id) {
+            throw new BadRequestError(
+                'Você não tem permissão para editar este post'
+            );
+        }
+
+        const postDBExists = await this.postDatabase.findPostById(idToEdit);
 
         if (!postDBExists) {
-            throw new BadRequestError("'id' não encontrado");
+            throw new BadRequestError(
+                'Não foi encontrado nenhum post com id recebido'
+            );
         }
 
         const post = new Post(
@@ -170,55 +195,10 @@ export class PostBusiness {
             postDBExists.updated_at
         );
 
-        if (newId !== undefined) {
-            if (typeof newId !== 'string') {
-                throw new BadRequestError("'id' deve ser string");
-            }
-        }
+        const newDate = format(new Date(), 'dd-MM-yyyy HH:mm:ss');
 
-        if (newCreatorId !== undefined) {
-            if (typeof newCreatorId !== 'string') {
-                throw new BadRequestError("'creatorId' deve ser string");
-            }
-        }
-
-        if (newContent !== undefined) {
-            if (typeof newContent !== 'string') {
-                throw new BadRequestError("'content' deve ser string");
-            }
-        }
-
-        if (newLikes !== undefined) {
-            if (typeof newLikes !== 'number') {
-                throw new BadRequestError("'likes' deve ser number");
-            }
-        }
-
-        if (newDislikes !== undefined) {
-            if (typeof newDislikes !== 'number') {
-                throw new BadRequestError("'dislikes' deve ser number");
-            }
-        }
-
-        if (newCreatedAt !== undefined) {
-            if (typeof newCreatedAt !== 'string') {
-                throw new BadRequestError("'createdAt' deve ser string");
-            }
-        }
-
-        if (newUpdatedAt !== undefined) {
-            if (typeof newUpdatedAt !== 'string') {
-                throw new BadRequestError("'updatedAt' deve ser string");
-            }
-        }
-
-        newId && post.setId(newId);
-        newCreatorId && post.setCreatedId(newCreatorId);
         newContent && post.setContent(newContent);
-        newLikes && post.setLikes(newLikes);
-        newDislikes && post.setDislikes(newDislikes);
-        newCreatedAt && post.setCreatedAt(newCreatedAt);
-        newUpdatedAt && post.setUpdatedAt(newUpdatedAt);
+        post.setUpdatedAt(newDate);
 
         const newPost: PostDB = {
             id: post.getId(),
@@ -230,11 +210,17 @@ export class PostBusiness {
             updated_at: post.getUpdatedAt(),
         };
 
-        await this.postDatabase.updatePostById(id, newPost);
+        await this.postDatabase.updatePostById(
+            idToEdit,
+            newPost.content,
+            newPost.updated_at
+        );
 
-        const output = {
+        console.log(idToEdit, newPost.content, newPost.updated_at);
+
+        const output: UpdatePostOutputDTO = {
             message: 'Post atualizado com sucesso',
-            post: post,
+            content: newPost.content,
         };
 
         return output;
