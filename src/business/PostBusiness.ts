@@ -11,6 +11,10 @@ import {
     UpdatePostInputDTO,
     UpdatePostOutputDTO,
 } from '../dtos/posts/updatePostDto';
+import {
+    DeletePostInputDTO,
+    DeletePostOutputDTO,
+} from '../dtos/posts/deletePostDto';
 
 export class PostBusiness {
     constructor(
@@ -216,7 +220,7 @@ export class PostBusiness {
             newPost.updated_at
         );
 
-        console.log(idToEdit, newPost.content, newPost.updated_at);
+        // console.log(idToEdit, newPost.content, newPost.updated_at);
 
         const output: UpdatePostOutputDTO = {
             message: 'Post atualizado com sucesso',
@@ -227,8 +231,38 @@ export class PostBusiness {
     };
 
     // DELETE
-    public deletePost = async (input: any) => {
-        const { id } = input;
+    public deletePost = async (
+        input: DeletePostInputDTO
+    ): Promise<DeletePostOutputDTO> => {
+        const { id, token } = input;
+
+        console.log(id, token);
+
+        const payload = this.tokenManager.getPayload(token);
+
+        if (payload === null) {
+            throw new BadRequestError(
+                'É preciso um token válido para acessar essa funcionalidade'
+            );
+        }
+
+        const postDB: PostDB[] = await this.postDatabase.findAllPosts();
+
+        const mapPost = new Map();
+
+        postDB.forEach((post) => {
+            mapPost.set(post.id, post);
+        });
+
+        const postToDelete = mapPost.get(id);
+
+        if (payload.role !== 'ADMIN') {
+            if (postToDelete.creator_id !== payload.id) {
+                throw new BadRequestError(
+                    'Você não tem permissão para deletar este post'
+                );
+            }
+        }
 
         const postDBExists = await this.postDatabase.findPostById(id);
 
@@ -248,9 +282,8 @@ export class PostBusiness {
 
         await this.postDatabase.deletePostById(id);
 
-        const output = {
+        const output: DeletePostOutputDTO = {
             message: 'Post deletado com sucesso',
-            post: post,
         };
 
         return output;

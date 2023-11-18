@@ -83,9 +83,9 @@ export class UserBusiness {
             name,
             email,
             hashPassword,
-            // USER_ROLES.NORMAL,
+            USER_ROLES.NORMAL,
             // Somente para teste:
-            USER_ROLES.ADMIN,
+            // USER_ROLES.ADMIN,
             format(new Date(), 'dd-MM-yyyy HH:mm:ss')
         );
 

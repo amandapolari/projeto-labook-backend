@@ -5,6 +5,7 @@ import { CreatePostSchema } from '../dtos/posts/createPostDto';
 import { GetPostsSchema } from '../dtos/posts/getPostsDto';
 import { UpdatePostSchema } from '../dtos/posts/updatePostDto';
 import { ZodError } from 'zod';
+import { DeletePostSchema } from '../dtos/posts/deletePostDto';
 
 export class PostController {
     constructor(private postBusiness: PostBusiness) {}
@@ -82,9 +83,10 @@ export class PostController {
     // DELETE
     public deletePost = async (req: Request, res: Response) => {
         try {
-            const input = {
+            const input = DeletePostSchema.parse({
                 id: req.params.id,
-            };
+                token: req.headers.authorization,
+            });
 
             const output = await this.postBusiness.deletePost(input);
 
