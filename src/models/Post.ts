@@ -31,6 +31,12 @@ export interface GetPost {
     };
 }
 
+export interface LikeDislikeDB {
+    user_id: string;
+    video_id: string;
+    like: number;
+}
+
 export class Post {
     constructor(
         protected id: string,
@@ -96,5 +102,21 @@ export class Post {
 
     public setUpdatedAt(updatedAt: string): void {
         this.updatedAt = updatedAt;
+    }
+
+    public addLike(): void {
+        this.likes++;
+    }
+
+    public removeLike(): void {
+        this.likes--;
+    }
+
+    public addDislike(): void {
+        this.dislikes++;
+    }
+
+    public removeDislike(): void {
+        this.dislikes--;
     }
 }

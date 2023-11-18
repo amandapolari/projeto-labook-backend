@@ -15,6 +15,11 @@ import {
     DeletePostInputDTO,
     DeletePostOutputDTO,
 } from '../dtos/posts/deletePostDto';
+import {
+    LikeOrDislikeInputDTO,
+    LikeOrDislikeOutputDTO,
+} from '../dtos/posts/likeOrDislikeDto';
+import { NotFoundError } from '../errors/NotFoundError';
 
 export class PostBusiness {
     constructor(
@@ -236,7 +241,7 @@ export class PostBusiness {
     ): Promise<DeletePostOutputDTO> => {
         const { id, token } = input;
 
-        console.log(id, token);
+        // console.log(id, token);
 
         const payload = this.tokenManager.getPayload(token);
 
@@ -287,5 +292,118 @@ export class PostBusiness {
         };
 
         return output;
+    };
+
+    // LIKE E DISLAKE
+    public likeOrDislike = async (
+        input: LikeOrDislikeInputDTO
+    ): Promise<LikeOrDislikeOutputDTO> => {
+        const { idPost, token, like } = input;
+
+        const payload = this.tokenManager.getPayload(token);
+
+        if (payload === null) {
+            throw new BadRequestError(
+                'É preciso um token válido para acessar essa funcionalidade'
+            );
+        }
+
+        const userId = payload.id;
+
+        const postDB = await this.postDatabase.findPostById(idPost);
+
+        if (!postDB) {
+            throw new NotFoundError('Não existe post com o id fornecido');
+        }
+
+        const post = new Post(
+            postDB.id,
+            postDB.creator_id,
+            postDB.content,
+            postDB.likes,
+            postDB.dislikes,
+            postDB.created_at,
+            postDB.updated_at
+        );
+
+        if (postDB.creator_id === payload.id) {
+            throw new BadRequestError(
+                'Não é possível dar like ou dislike no seu próprio post'
+            );
+        }
+
+        const likeDislikeDB = await this.postDatabase.findLikeOrDislike(
+            userId,
+            post.getId()
+        );
+
+        const likeSqlite = like ? 1 : 0;
+
+        if (!likeDislikeDB) {
+            await this.postDatabase.createLikeDislike(
+                userId,
+                post.getId(),
+                likeSqlite
+            );
+
+            if (like) {
+                post.addLike();
+                await this.postDatabase.updateLikes(idPost, post.getLikes());
+            } else {
+                post.addDislike();
+
+                await this.postDatabase.updateDislikes(
+                    idPost,
+                    post.getDislikes()
+                );
+            }
+        } else if (likeDislikeDB.like) {
+            if (like) {
+                await this.postDatabase.removeLikeDislike(idPost, userId);
+                post.removeLike();
+
+                await this.postDatabase.updateLikes(idPost, post.getLikes());
+            } else {
+                await this.postDatabase.updateLikeDislike(
+                    idPost,
+                    userId,
+                    likeSqlite
+                );
+                post.removeLike();
+                post.addDislike();
+
+                await this.postDatabase.updateLikes(idPost, post.getLikes());
+                await this.postDatabase.updateDislikes(
+                    idPost,
+                    post.getDislikes()
+                );
+            }
+        } else {
+            if (!like) {
+                await this.postDatabase.removeLikeDislike(idPost, userId);
+                post.removeDislike();
+
+                await this.postDatabase.updateDislikes(
+                    idPost,
+                    post.getDislikes()
+                );
+            } else {
+                await this.postDatabase.updateLikeDislike(
+                    idPost,
+                    userId,
+                    likeSqlite
+                );
+                post.removeDislike();
+                post.addLike();
+
+                await this.postDatabase.updateLikes(idPost, post.getLikes());
+                await this.postDatabase.updateDislikes(
+                    idPost,
+                    post.getDislikes()
+                );
+            }
+        }
+
+        return;
     };
 }
