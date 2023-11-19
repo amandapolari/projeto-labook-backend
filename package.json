@@ -1,7 +1,7 @@
 {
   "name": "projeto-labook-backend",
   "version": "1.0.0",
-  "description": "-   [Resumo do Projeto](#resumo-do-projeto)\r -   [Tecnologias e conteúdos utilizados](#tecnologias-e-conteúdos-utilizados)",
+  "description": "",
   "main": "index.js",
   "scripts": {
     "start": "node ./build/index.js",

@@ -31,44 +31,8 @@ CREATE TABLE
         FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE ON UPDATE CASCADE
     )
 
-INSERT INTO users
-VALUES (
-        'u001',
-        'Layla',
-        'layla@gmail.com',
-        'Layla@123',
-        'user',
-        '27-10-2023 17:57:01'
-    ), (
-        'u002',
-        'Lily',
-        'lily@gmail.com',
-        'Lily@123',
-        'user',
-        '27-10-2023 17:57:02'
-    )
-
-INSERT INTO posts
-VALUES (
-        'p001',
-        'u001',
-        'My first post',
-        1,
-        2,
-        '27-10-2023 17:57:01',
-        '27-10-2023 17:57:11'
-    ), (
-        'p002',
-        'u002',
-        'My second post',
-        1,
-        2,
-        '27-10-2023 17:57:02',
-        '27-10-2023 17:57:22'
-    )
-
 DROP TABLE users;
 
 DROP TABLE posts;
 
-DROP TABLE likes_dislakes;
+DROP TABLE likes_dislikes;

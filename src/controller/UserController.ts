@@ -8,8 +8,7 @@ import { LoginSchema } from '../dtos/users/loginDto';
 export class UserController {
     constructor(private userBusiness: UserBusiness) {}
 
-    // GET => APENAS PARA AJUDAR A CODIFICAR | NÃO TEM ARQUITETURA APLICADA
-    // Apliquei dto para mostrar como seria receber token em getusers
+    // GET => APENAS PARA AJUDAR A CODIFICAR
     public getUsers = async (req: Request, res: Response) => {
         try {
             const input = {

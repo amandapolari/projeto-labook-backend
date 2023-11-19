@@ -40,7 +40,9 @@ export class PostBusiness {
         const payload = this.tokenManager.getPayload(token);
 
         if (payload === null) {
-            throw new BadRequestError('token inválido');
+            throw new BadRequestError(
+                'É necessário um token para acessar essa funcionalidade'
+            );
         }
 
         const posts: Post[] = postsDB.map((post: PostDB) => {
@@ -65,8 +67,6 @@ export class PostBusiness {
             mapUserIdName.set(user.id, user);
         });
 
-        // console.log(mapUserIdName);
-
         const output: GetPost[] = posts.map((post: Post) => {
             const user = mapUserIdName.get(post.getCreatedId());
             return {
@@ -88,44 +88,24 @@ export class PostBusiness {
 
     // POST
     public createPost = async (input: CreateInputDTO) => {
-        // Recebendo dados do input:
         const { token, content } = input;
 
-        // Gerando uuid:
         const id = this.idGenerator.generate();
 
-        // Vericando se o id já existe:
         const postDBExists = await this.postDatabase.findPostById(id);
 
         if (postDBExists) {
             throw new BadRequestError("'id' já existe");
         }
 
-        // Gerando uuid para post:
         const payload = this.tokenManager.getPayload(token);
 
-        // testando o que vem no token:
-        /*
-        {
-        id: '073a07d0-56b5-4cc1-9b01-09db47f7f301',
-        name: 'Amanda',
-        role: 'ADMIN',
-        iat: 1700242436,
-        exp: 1700847236
-        }
-        */
-        // console.log(payload);
-        //--
-
-        // Para garantir que o token é válido:
         if (payload === null) {
             throw new BadRequestError('token inválido');
         }
 
-        // Capturando o id do usuário que criou o post:
         const idCreator = payload.id as string;
 
-        // Intanciando um novo post:
         const post = new Post(
             id,
             idCreator,
@@ -225,8 +205,6 @@ export class PostBusiness {
             newPost.updated_at
         );
 
-        // console.log(idToEdit, newPost.content, newPost.updated_at);
-
         const output: UpdatePostOutputDTO = {
             message: 'Post atualizado com sucesso',
             content: newPost.content,
@@ -240,8 +218,6 @@ export class PostBusiness {
         input: DeletePostInputDTO
     ): Promise<DeletePostOutputDTO> => {
         const { id, token } = input;
-
-        // console.log(id, token);
 
         const payload = this.tokenManager.getPayload(token);
 
@@ -294,7 +270,7 @@ export class PostBusiness {
         return output;
     };
 
-    // LIKE E DISLAKE
+    // LIKE E DISLIKE
     public likeOrDislike = async (
         input: LikeOrDislikeInputDTO
     ): Promise<LikeOrDislikeOutputDTO> => {
