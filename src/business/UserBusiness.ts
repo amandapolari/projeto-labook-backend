@@ -8,6 +8,7 @@ import { NotFoundError } from '../errors/NotFoundError';
 import { IdGenerator } from '../services/IdGenerator';
 import { TokenManager } from '../services/TokenManager';
 import { HashManager } from '../services/HashManager';
+import { GetUsersInputDTO } from '../dtos/users/getUsersDto';
 
 export class UserBusiness {
     constructor(
@@ -18,24 +19,15 @@ export class UserBusiness {
     ) {}
 
     // GET => APENAS PARA AJUDAR A CODIFICAR | NÃO TEM ARQUITETURA APLICADA
-    public getUsers = async (input: any) => {
+    public getUsers = async (input: GetUsersInputDTO) => {
         const { q, token } = input;
 
         const payload = this.tokenManager.getPayload(token);
 
-        // console.log(payload);
-        /*
-        {
-        id: '073a07d0-56b5-4cc1-9b01-09db47f7f301',
-        name: 'Amanda',
-        role: 'ADMIN',
-        iat: 1700241882,
-        exp: 1700846682
-        }
-        */
-
         if (payload === null) {
-            throw new BadRequestError('token inválido');
+            throw new BadRequestError(
+                'É necessário um token para acessar essa funcionalidade'
+            );
         }
 
         if (payload.role !== USER_ROLES.ADMIN) {
@@ -48,7 +40,7 @@ export class UserBusiness {
             q as string | undefined
         );
 
-        const users: User[] = usersDB.map((user: UserDB) => {
+        const users = usersDB.map((user: UserDB) => {
             return new User(
                 user.id,
                 user.name,
@@ -110,7 +102,7 @@ export class UserBusiness {
 
         const output: SignupOutputDTO = {
             message: 'Usuário cadastrado com sucesso',
-            token: token,
+            token,
         };
 
         return output;
@@ -126,16 +118,13 @@ export class UserBusiness {
             throw new NotFoundError("'email' não encontrado");
         }
 
-        // o password hasheado está no banco de dados
         const hashedPassword = userDB.password;
 
-        // o serviço hashManager analisa o password do body (plaintext) e o hash
         const isPasswordCorrect = await this.hashManager.compare(
             password,
             hashedPassword
         );
 
-        // validamos o resultado
         if (!isPasswordCorrect) {
             throw new BadRequestError("'email' ou 'password' incorretos");
         }

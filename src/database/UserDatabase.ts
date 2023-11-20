@@ -1,4 +1,3 @@
-// TIPAR MELHOR ESSE ARQUIVO
 import { UserDB } from '../models/User';
 import { BaseDatabase } from './BaseDatabase';
 
