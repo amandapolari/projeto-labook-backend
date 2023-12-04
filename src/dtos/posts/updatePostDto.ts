@@ -3,7 +3,7 @@ import z from 'zod';
 export interface UpdatePostInputDTO {
     idToEdit: string;
     token: string;
-    newContent: string;
+    content: string;
 }
 
 export type UpdatePostOutputDTO = {
@@ -21,7 +21,7 @@ export const UpdatePostSchema = z
             required_error: '"token" é obrigatório',
             invalid_type_error: '"token" precisa ser uma string',
         }),
-        newContent: z.string({
+        content: z.string({
             invalid_type_error: '"content" precisa ser uma string',
         }),
     })

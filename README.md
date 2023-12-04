@@ -23,7 +23,7 @@
 
 [🔼](#índice)
 
-O Labook é uma plataforma de rede social que permite a interação entre os usuários. Ao se cadastrar e logar na plataforma, os usuários têm a capacidade de criar e curtir postagens.
+O Labook é uma plataforma de rede social que permite a interação entre os usuários. Ao se cadastrar e fazer login na plataforma, os usuários podem criar, dar like ou dislike em postagens de outros usuários.
 
 A plataforma oferece uma variedade de recursos e funcionalidades que incluem:
 
@@ -31,7 +31,7 @@ A plataforma oferece uma variedade de recursos e funcionalidades que incluem:
 
 -   **Criação de Postagens**: Os membros do Labook têm a capacidade de compartilhar suas ideias, pensamentos e experiências por meio de postagens.
 
--   **Likes e Deslikes**: Os usuários podem "curtir" ou "descurtir" postagens de outros membros, permitindo uma variedade de interações e opiniões sobre o conteúdo compartilhado.
+-   **Likes e Dislikes**: Os usuários podem "curtir" ou "descurtir" postagens de outros membros, permitindo uma variedade de interações e opiniões sobre o conteúdo compartilhado.
 
 -   **Gerenciamento de Postagens**: Os criadores de postagens têm controle total sobre seu conteúdo, podendo editá-lo ou excluí-lo conforme necessário.
 
@@ -68,11 +68,11 @@ Clique [aqui](https://dbdiagram.io/d/63d16443296d97641d7c1ae1) para conferir o s
 
 [🔼](#índice)
 
-### Pré-requisitos:
+#### Pré-requisitos:
 
 Ter instalado o `node.js` e o `npm` .
 
-### Instalações necessárias:
+#### Instalações necessárias:
 
 ```bash
 npm install
@@ -99,15 +99,13 @@ A base URL para esta API é **`http://localhost:3003`**
 Os endpoints estão divididos em pastas de acordo com o que é gerenciado.
 A API fornece os seguintes endpoints:
 
-## Exemplos de requisição
-
 ### Signup
 
 [🔼](#índice)
 
 -   Endpoint público
 -   Método HTTP: POST
--   Descrição: Cria um novo usuário.
+-   Descrição: Cria um novo usuário
 -   Enviar via body: `name`, `email` e `password`
 
 **INPUT:**
@@ -136,7 +134,7 @@ A API fornece os seguintes endpoints:
 -   Endpoint público
 -   Método HTTP: POST
 -   Descrição: Realiza o login do usuário.
--   Enviar via body: email e password
+-   Enviar via body: `email` e `password`
 
 **INPUT:**
 
@@ -163,7 +161,7 @@ A API fornece os seguintes endpoints:
 -   Endpoint privado
 -   Método HTTP: POST
 -   Descrição: Cria um novo post.
--   Enviar via headers um Authorization: `token`
+-   Enviar via headers.authorization: `token_de_autenticação`
 -   Enviar via body: `content`
 
 **INPUT:**
@@ -193,12 +191,12 @@ A API fornece os seguintes endpoints:
 -   Endpoint privado
 -   Método HTTP: GET
 -   Descrição: Recupera uma lista de todos os usuários cadastrados no sistema.
--   Enviar via headers um Authorization: `token`
+-   Enviar via headers.authorization: `token_de_autenticação`
 
 **INPUT:**
 
 ```json
-// headers.authorization = "token"
+// headers.authorization = "token_de_autenticação"
 ```
 
 **OUTPUT:**
@@ -240,19 +238,19 @@ A API fornece os seguintes endpoints:
 -   Método HTTP: PUT
 -   Descrição: Edita o conteúdo de um post existente.
 -   Enviar via params: `id` do post
--   Enviar via headers um Authorization: `token`
--   Enviar via body: `newContext`
+-   Enviar via headers.authorization: `token_de_autenticação`
+-   Enviar via body: `content`
 
 **INPUT:**
 
 ```json
 // params :id
 
-// headers.authorization = "token"
+// headers.authorization = "token_de_autenticação"
 
 // body:
 {
-    "newContext": "Texto editado do post"
+    "content": "Texto editado do post"
 }
 ```
 
@@ -265,10 +263,6 @@ A API fornece os seguintes endpoints:
 }
 ```
 
----
-
-## CONTINUAR A DESCREVER OS ENDPOINTS DAQUI SÓ FALTA O DELETE E O LIKE E DISLIKE
-
 ### Delete post
 
 [🔼](#índice)
@@ -277,12 +271,12 @@ A API fornece os seguintes endpoints:
 -   Método HTTP: DELETE
 -   Descrição: Deleta um post criado por você.
 -   Enviar via params: id
--   Enviar via headers: Authorization
+-   Enviar via headers.authorization: `token_de_autenticação`
 
 ```json
 // params :id
 
-// headers.authorization = "token"
+// headers.authorization = "token_de_autenticação"
 ```
 
 **OUTPUT:**

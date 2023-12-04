@@ -40,15 +40,16 @@ export class UserBusiness {
             q as string | undefined
         );
 
-        const users = usersDB.map((user: UserDB) => {
-            return new User(
-                user.id,
-                user.name,
-                user.email,
-                user.password,
-                user.role,
-                user.created_at
+        const users = usersDB.map((userDB) => {
+            const user = new User(
+                userDB.id,
+                userDB.name,
+                userDB.email,
+                userDB.password,
+                userDB.role,
+                userDB.created_at
             );
+            return user.toBusinessModel();
         });
 
         const output = users;
@@ -70,7 +71,7 @@ export class UserBusiness {
 
         const hashPassword = await this.hashManager.hash(password);
 
-        const user = new User(
+        const newUser = new User(
             id,
             name,
             email,
@@ -81,21 +82,15 @@ export class UserBusiness {
             format(new Date(), 'dd-MM-yyyy HH:mm:ss')
         );
 
-        const newUser: UserDB = {
-            id: user.getId(),
-            name: user.getName(),
-            email: user.getEmail(),
-            password: user.getPassword(),
-            role: user.getRole(),
-            created_at: user.getUpdatedAt(),
-        };
+        const newUserDB = newUser.toDBModel();
 
-        await this.userDatabase.insertUser(newUser);
+        await this.userDatabase.insertUser(newUserDB);
 
         const payload: TokenPayload = {
-            id: user.getId(),
-            name: user.getName(),
-            role: user.getRole() as USER_ROLES,
+            id: newUser.getId(),
+            name: newUser.getName(),
+            // role: newUser.getRole(),
+            role: newUser.getRole() as USER_ROLES,
         };
 
         const token = this.tokenManager.createToken(payload);

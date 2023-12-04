@@ -119,4 +119,16 @@ export class Post {
     public removeDislike(): void {
         this.dislikes--;
     }
+
+    public toPostDB(): PostDB {
+        return {
+            id: this.id,
+            creator_id: this.creatorId,
+            content: this.content,
+            likes: this.likes,
+            dislikes: this.dislikes,
+            created_at: this.createdAt,
+            updated_at: this.updatedAt,
+        };
+    }
 }
