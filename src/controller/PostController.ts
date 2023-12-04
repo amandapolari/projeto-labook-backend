@@ -62,7 +62,7 @@ export class PostController {
             const input = UpdatePostSchema.parse({
                 idToEdit: req.params.id,
                 token: req.headers.authorization,
-                newContent: req.body.newContent,
+                content: req.body.content,
             });
 
             const output = await this.postBusiness.updatePost(input);

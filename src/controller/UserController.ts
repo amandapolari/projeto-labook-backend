@@ -4,17 +4,18 @@ import { BaseError } from '../errors/BaseError';
 import { SignupSchema } from '../dtos/users/signupDto';
 import { ZodError } from 'zod';
 import { LoginSchema } from '../dtos/users/loginDto';
+import { GetUsersSchema } from '../dtos/users/getUsersDto';
 
 export class UserController {
     constructor(private userBusiness: UserBusiness) {}
 
-    // GET => APENAS PARA AJUDAR A CODIFICAR
+    // GET => Endpoint para teste protegido para somente administradores poderem utilizar:
     public getUsers = async (req: Request, res: Response) => {
         try {
-            const input = {
+            const input = GetUsersSchema.parse({
                 q: req.query.q as string | undefined,
                 token: req.headers.authorization as string,
-            };
+            });
 
             const output = await this.userBusiness.getUsers(input);
 
@@ -31,7 +32,7 @@ export class UserController {
         }
     };
 
-    // SIGNUP (OBRIGATÓRIO)
+    // SIGNUP
     public signup = async (req: Request, res: Response) => {
         try {
             const input = SignupSchema.parse({
@@ -55,7 +56,7 @@ export class UserController {
         }
     };
 
-    // LOGIN (OBRIGATÓRIO)
+    // LOGIN
     public login = async (req: Request, res: Response) => {
         try {
             const input = LoginSchema.parse({
@@ -64,56 +65,6 @@ export class UserController {
             });
 
             const output = await this.userBusiness.login(input);
-
-            res.status(200).send(output);
-        } catch (error) {
-            console.log(error);
-            if (error instanceof ZodError) {
-                res.status(400).send(error.issues);
-            } else if (error instanceof BaseError) {
-                res.status(error.statusCode).send(error.message);
-            } else {
-                res.status(500).send('Erro inesperado');
-            }
-        }
-    };
-
-    // UPDATE => APENAS PARA AJUDAR A CODIFICAR | NÃO TEM ARQUITETURA APLICADA
-    public updateUser = async (req: Request, res: Response) => {
-        try {
-            const input = {
-                id: req.params.id,
-                newId: req.body.id as string,
-                newName: req.body.name as string,
-                newEmail: req.body.email as string,
-                newPassword: req.body.password as string,
-                newRole: req.body.role as string,
-                newCreatedAt: req.body.createdAt as string,
-            };
-
-            const output = await this.userBusiness.updateUser(input);
-
-            res.status(200).send(output);
-        } catch (error) {
-            console.log(error);
-            if (error instanceof ZodError) {
-                res.status(400).send(error.issues);
-            } else if (error instanceof BaseError) {
-                res.status(error.statusCode).send(error.message);
-            } else {
-                res.status(500).send('Erro inesperado');
-            }
-        }
-    };
-
-    // DELETE => APENAS PARA AJUDAR A CODIFICAR | NÃO TEM ARQUITETURA APLICADA
-    public deleteUser = async (req: Request, res: Response) => {
-        try {
-            const input = {
-                id: req.params.id,
-            };
-
-            const output = await this.userBusiness.deleteUser(input);
 
             res.status(200).send(output);
         } catch (error) {

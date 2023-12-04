@@ -116,21 +116,13 @@ export class PostBusiness {
             format(new Date(), 'dd-MM-yyyy HH:mm:ss')
         );
 
-        const newPost: PostDB = {
-            id: post.getId(),
-            creator_id: post.getCreatedId(),
-            content: post.getContent(),
-            likes: post.getLikes(),
-            dislikes: post.getDislikes(),
-            created_at: post.getCreatedAt(),
-            updated_at: post.getUpdatedAt(),
-        };
+        const newPost = post.toPostDB();
 
         await this.postDatabase.insertPost(newPost);
 
         const output = {
             message: 'Post criado com sucesso',
-            post: content,
+            content,
         };
 
         return output;
@@ -140,7 +132,7 @@ export class PostBusiness {
     public updatePost = async (
         input: UpdatePostInputDTO
     ): Promise<UpdatePostOutputDTO> => {
-        const { idToEdit, token, newContent } = input;
+        const { idToEdit, token, content } = input;
 
         const payload = this.tokenManager.getPayload(token);
 
@@ -186,18 +178,10 @@ export class PostBusiness {
 
         const newDate = format(new Date(), 'dd-MM-yyyy HH:mm:ss');
 
-        newContent && post.setContent(newContent);
+        content && post.setContent(content);
         post.setUpdatedAt(newDate);
 
-        const newPost: PostDB = {
-            id: post.getId(),
-            creator_id: post.getCreatedId(),
-            content: post.getContent(),
-            likes: post.getLikes(),
-            dislikes: post.getDislikes(),
-            created_at: post.getCreatedAt(),
-            updated_at: post.getUpdatedAt(),
-        };
+        const newPost = post.toPostDB();
 
         await this.postDatabase.updatePostById(
             idToEdit,
@@ -274,24 +258,31 @@ export class PostBusiness {
     public likeOrDislike = async (
         input: LikeOrDislikeInputDTO
     ): Promise<LikeOrDislikeOutputDTO> => {
+        // Recebendo e desestruturando os dados do input:
         const { idPost, token, like } = input;
 
+        // Obtendo o payload através do token:
         const payload = this.tokenManager.getPayload(token);
 
+        // Se o token for inválido vai retornar null
         if (payload === null) {
             throw new BadRequestError(
                 'É preciso um token válido para acessar essa funcionalidade'
             );
         }
 
+        // Esse é o id de quem está logado, pois foi obtido através do token:
         const userId = payload.id;
 
+        // Buscando o post no banco de dados:
         const postDB = await this.postDatabase.findPostById(idPost);
 
+        // Se ele não encontrar o post, vai retornar undefined e vai lançar um erro:
         if (!postDB) {
             throw new NotFoundError('Não existe post com o id fornecido');
         }
 
+        // Instanciando que o usuário foneceu o id:
         const post = new Post(
             postDB.id,
             postDB.creator_id,
@@ -302,44 +293,59 @@ export class PostBusiness {
             postDB.updated_at
         );
 
+        // Se o id do usuário for igual ao id do criador do post, vai lançar um erro:
         if (postDB.creator_id === payload.id) {
             throw new BadRequestError(
                 'Não é possível dar like ou dislike no seu próprio post'
             );
         }
 
+        // Buscando no banco de dados se o usuário já deu like ou dislike no post:
         const likeDislikeDB = await this.postDatabase.findLikeOrDislike(
             userId,
             post.getId()
         );
 
+        // Se o usuário tiver dado like ou dislike, vai retornar 1 ou 0:
+        // Porque na tabela sql like e dislike são booleanos:
         const likeSqlite = like ? 1 : 0;
 
+        // Se o usuário não tiver dado like ou dislike, vai criar um novo like ou dislike:
         if (!likeDislikeDB) {
+            // Inserindo um like ou um dislike no banco de dados na tabela likes_dislikes:
             await this.postDatabase.createLikeDislike(
                 userId,
                 post.getId(),
                 likeSqlite
             );
 
+            // Se o usuário tiver dado like, vai adicionar um like no post:
             if (like) {
                 post.addLike();
                 await this.postDatabase.updateLikes(idPost, post.getLikes());
+
+                // Se o usuário tiver dado dislike, vai adicionar um dislike no post:
             } else {
                 post.addDislike();
 
+                // Atualizando o número de likes e dislikes no banco de dados:
                 await this.postDatabase.updateDislikes(
                     idPost,
                     post.getDislikes()
                 );
             }
+
+            // Se o usuário já tiver dado like ou dislike, vai atualizar o like ou dislike:
         } else if (likeDislikeDB.like) {
             if (like) {
+                // Se o usuário já tiver dado like e clicar em like novamente, vai remover o like:
                 await this.postDatabase.removeLikeDislike(idPost, userId);
                 post.removeLike();
 
+                // Atualizando o número de likes no banco de dados:
                 await this.postDatabase.updateLikes(idPost, post.getLikes());
             } else {
+                // Se o usuário já tiver dado like e clicar em dislike, vai atualizar o like para dislike:
                 await this.postDatabase.updateLikeDislike(
                     idPost,
                     userId,
@@ -348,6 +354,7 @@ export class PostBusiness {
                 post.removeLike();
                 post.addDislike();
 
+                // Atualizando o número de likes e dislikes no banco de dados:
                 await this.postDatabase.updateLikes(idPost, post.getLikes());
                 await this.postDatabase.updateDislikes(
                     idPost,
@@ -356,14 +363,17 @@ export class PostBusiness {
             }
         } else {
             if (!like) {
+                // Se o usuário já tiver dado dislike e clicar em dislike novamente, vai remover o dislike:
                 await this.postDatabase.removeLikeDislike(idPost, userId);
                 post.removeDislike();
 
+                // Atualizando o número de dislikes no banco de dados:
                 await this.postDatabase.updateDislikes(
                     idPost,
                     post.getDislikes()
                 );
             } else {
+                // Se o usuário já tiver dado dislike e clicar em like, vai atualizar o dislike para like:
                 await this.postDatabase.updateLikeDislike(
                     idPost,
                     userId,
@@ -372,6 +382,7 @@ export class PostBusiness {
                 post.removeDislike();
                 post.addLike();
 
+                // Atualizando o número de likes e dislikes no banco de dados:
                 await this.postDatabase.updateLikes(idPost, post.getLikes());
                 await this.postDatabase.updateDislikes(
                     idPost,

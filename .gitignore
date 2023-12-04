@@ -4,4 +4,3 @@ build
 *.db
 package-lock.json
 .env
-```

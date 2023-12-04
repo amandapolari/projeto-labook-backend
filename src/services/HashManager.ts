@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-// Tranforma a senha(plaintext) em Hash:
+// Tranforma a `plaintext`(senha) em `hash`:
 export class HashManager {
     public hash = async (plaintext: string): Promise<string> => {
         const rounds = Number(process.env.BCRYPT_COST);
@@ -13,7 +13,7 @@ export class HashManager {
         return hash;
     };
 
-    // Verifica se é possível gerar uma determinada Hash(hash) a partir de uma determinada senha(plaintext):
+    // Verifica se é possível gerar uma determinada `hash` a partir de uma determinada `plaintext`(senha):
     public compare = async (
         plaintext: string,
         hash: string

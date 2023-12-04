@@ -8,6 +8,7 @@
 -   [4. Instalação](#instalação)
 -   [5. Inicialização](#inicialização)
 -   [6. Endpoints](#endpoints)
+    -   [Get Users](#get-users)
     -   [Signup](#signup)
     -   [Login](#login)
     -   [Create Post](#create-post)
@@ -21,17 +22,17 @@
 
 ## Resumo do Projeto
 
-[🔼](#índice)
+[🔼](#projeto-labook)
 
-O Labook é uma plataforma de rede social que permite a interação entre os usuários. Ao se cadastrar e logar na plataforma, os usuários têm a capacidade de criar e curtir postagens.
+O Labook é uma API de rede social que permite a interação entre os usuários. Ao se cadastrar e fazer login na plataforma, os usuários podem criar, dar like ou dislike em postagens de outros usuários.
 
 A plataforma oferece uma variedade de recursos e funcionalidades que incluem:
 
--   **Cadastro de Usuários**: Através do processo de cadastro, os usuários podem criar suas contas na plataforma, fornecendo informações pessoais básicas, como nome, endereço de e-mail e senha.
+-   **Cadastro de Usuários**: Através do processo de cadastro, os usuários podem criar suas contas na plataforma, fornecendo informações pessoais básicas como **nome**, **email** e **senha**.
 
 -   **Criação de Postagens**: Os membros do Labook têm a capacidade de compartilhar suas ideias, pensamentos e experiências por meio de postagens.
 
--   **Likes e Deslikes**: Os usuários podem "curtir" ou "descurtir" postagens de outros membros, permitindo uma variedade de interações e opiniões sobre o conteúdo compartilhado.
+-   **Likes e Dislikes**: Os usuários podem "curtir" ou "descurtir" postagens de outros membros, permitindo uma variedade de interações e opiniões sobre o conteúdo compartilhado.
 
 -   **Gerenciamento de Postagens**: Os criadores de postagens têm controle total sobre seu conteúdo, podendo editá-lo ou excluí-lo conforme necessário.
 
@@ -39,7 +40,7 @@ A plataforma oferece uma variedade de recursos e funcionalidades que incluem:
 
 ## Tecnologias e conteúdos utilizados
 
-[🔼](#índice)
+[🔼](#projeto-labook)
 
 -   NodeJS
 -   Typescript
@@ -56,7 +57,7 @@ A plataforma oferece uma variedade de recursos e funcionalidades que incluem:
 
 ## Banco de dados
 
-[🔼](#índice)
+[🔼](#projeto-labook)
 
 As entidades do banco de dados estão estruturadas da seguinte forma:
 
@@ -66,13 +67,9 @@ Clique [aqui](https://dbdiagram.io/d/63d16443296d97641d7c1ae1) para conferir o s
 
 ## Instalação
 
-[🔼](#índice)
+[🔼](#projeto-labook)
 
-### Pré-requisitos:
-
-Ter instalado o `node.js` e o `npm` .
-
-### Instalações necessárias:
+Ter instalado o `node.js`, o `npm` e rodar o seguinte comando:
 
 ```bash
 npm install
@@ -80,7 +77,7 @@ npm install
 
 ## Inicialização
 
-[🔼](#índice)
+[🔼](#projeto-labook)
 
 Para rodar o servidor localmente digite o seguinte comando:
 
@@ -90,7 +87,7 @@ npm run dev
 
 ## Endpoints
 
-[🔼](#índice)
+[🔼](#projeto-labook)
 
 Clique [**AQUI**](https://documenter.getpostman.com/view/28316385/2s9Ye8fuWG) para visualizar a documentação da [API LABOOK](https://documenter.getpostman.com/view/28316385/2s9Ye8fuWG).
 
@@ -99,11 +96,63 @@ A base URL para esta API é **`http://localhost:3003`**
 Os endpoints estão divididos em pastas de acordo com o que é gerenciado.
 A API fornece os seguintes endpoints:
 
-## Exemplos de requisição
+### Get users
+
+[🔼](#projeto-labook)
+
+-   Endpoint privado (Somente **administradores** podem acessar esse recurso)
+-   Método HTTP: GET
+-   Descrição: Retorna todos os usuários cadastrados no sistema.
+-   Enviar via headers.authorization: `token_de_autenticação`
+
+**INPUT:**
+
+```json
+// headers.authorization = "token_de_autenticação"
+```
+
+**OUTPUT:**
+
+```json
+[
+    {
+        "id": "7ed8d1f6-4b22-4a0e-a38b-45f275c32d21",
+        "name": "Morgana",
+        "email": "morgana@gmail.com",
+        "password": "$2a$12$IOmC1TDDM6YNMTTkRWqRxOeZ06jz/OnMsjLEHZdX5OrFD3sJIVBXy",
+        "role": "NORMAL",
+        "createdAt": "04-12-2023 11:31:26"
+    },
+    {
+        "id": "16f86eba-fde0-42f5-a251-b0afe72b5c93",
+        "name": "Amanda",
+        "email": "amanda@gmail.com",
+        "password": "$2a$12$7VRnTvXK8X5wsj84O207POIWCWhs/Ps8pw5wJH49OyuwqedAijnKe",
+        "role": "ADMIN",
+        "createdAt": "19-11-2023 12:27:51"
+    },
+    {
+        "id": "527348d8-434d-4243-b5c9-927d8e96b418",
+        "name": "Atlas",
+        "email": "atlas@gmail.com",
+        "password": "$2a$12$KOKtDri0bntdxt5488R1nOZabISu9jF4vBCOWIMlt6vcrUnp3hhm.",
+        "role": "NORMAL",
+        "createdAt": "19-11-2023 13:10:34"
+    },
+    {
+        "id": "8b4d95ab-0b13-4092-8661-0b29bfa46830",
+        "name": "Luan",
+        "email": "luan@gmail.com",
+        "password": "$2a$12$DMX1r916xqOPGrFgeVj0JeZXQYSOCmT5lzAmXc5tb2i3ddAO7geLi",
+        "role": "ADMIN",
+        "createdAt": "17-11-2023 14:26:54"
+    }
+]
+```
 
 ### Signup
 
-[🔼](#índice)
+[🔼](#projeto-labook)
 
 -   Endpoint público
 -   Método HTTP: POST
@@ -114,9 +163,9 @@ A API fornece os seguintes endpoints:
 
 ```json
 {
-    "name": "Nome do Usuário",
-    "email": "usuario@email.com",
-    "password": "senha123"
+    "name": "Morgana",
+    "email": "morgana@email.com",
+    "password": "Morgana@123"
 }
 ```
 
@@ -131,19 +180,19 @@ A API fornece os seguintes endpoints:
 
 ### Login
 
-[🔼](#índice)
+[🔼](#projeto-labook)
 
 -   Endpoint público
 -   Método HTTP: POST
 -   Descrição: Realiza o login do usuário.
--   Enviar via body: email e password
+-   Enviar via body: `email` e `password`
 
 **INPUT:**
 
 ```json
 {
-    "email": "usuario@email.com",
-    "password": "senha123"
+    "email": "morgana@email.com",
+    "password": "Morgana@123"
 }
 ```
 
@@ -158,18 +207,18 @@ A API fornece os seguintes endpoints:
 
 ### Create post
 
-[🔼](#índice)
+[🔼](#projeto-labook)
 
 -   Endpoint privado
 -   Método HTTP: POST
 -   Descrição: Cria um novo post.
--   Enviar via headers um Authorization: `token`
+-   Enviar via headers.authorization: `token_de_autenticação`
 -   Enviar via body: `content`
 
 **INPUT:**
 
 ```json
-// headers.authorization = "token"
+// headers.authorization = "token_de_autenticação"
 
 // body:
 {
@@ -188,17 +237,17 @@ A API fornece os seguintes endpoints:
 
 ### Get posts
 
-[🔼](#índice)
+[🔼](#projeto-labook)
 
 -   Endpoint privado
 -   Método HTTP: GET
--   Descrição: Recupera uma lista de todos os usuários cadastrados no sistema.
--   Enviar via headers um Authorization: `token`
+-   Descrição: Retorna um array de objetos, onde cada objeto contém as informações de um post.
+-   Enviar via headers.authorization: `token_de_autenticação`
 
 **INPUT:**
 
 ```json
-// headers.authorization = "token"
+// headers.authorization = "token_de_autenticação"
 ```
 
 **OUTPUT:**
@@ -234,25 +283,25 @@ A API fornece os seguintes endpoints:
 
 ### Edit post
 
-[🔼](#índice)
+[🔼](#projeto-labook)
 
 -   Endpoint privado
 -   Método HTTP: PUT
 -   Descrição: Edita o conteúdo de um post existente.
 -   Enviar via params: `id` do post
--   Enviar via headers um Authorization: `token`
--   Enviar via body: `newContext`
+-   Enviar via headers.authorization: `token_de_autenticação`
+-   Enviar via body: `content`
 
 **INPUT:**
 
 ```json
 // params :id
 
-// headers.authorization = "token"
+// headers.authorization = "token_de_autenticação"
 
 // body:
 {
-    "newContext": "Texto editado do post"
+    "content": "Texto editado do post"
 }
 ```
 
@@ -265,24 +314,20 @@ A API fornece os seguintes endpoints:
 }
 ```
 
----
-
-## CONTINUAR A DESCREVER OS ENDPOINTS DAQUI SÓ FALTA O DELETE E O LIKE E DISLIKE
-
 ### Delete post
 
-[🔼](#índice)
+[🔼](#projeto-labook)
 
 -   Endpoint privado
 -   Método HTTP: DELETE
 -   Descrição: Deleta um post criado por você.
 -   Enviar via params: id
--   Enviar via headers: Authorization
+-   Enviar via headers.authorization: `token_de_autenticação`
 
 ```json
 // params :id
 
-// headers.authorization = "token"
+// headers.authorization = "token_de_autenticação"
 ```
 
 **OUTPUT:**
@@ -295,13 +340,13 @@ A API fornece os seguintes endpoints:
 
 ### Like or dislike post
 
-[🔼](#índice)
+[🔼](#projeto-labook)
 
 -   Endpoint privado
 -   Método HTTP: PUT
 -   Descrição: Dá like ou dislike em um post que não foi criado por você.
 -   Enviar via params: id
--   Enviar via headers: Authorization
+-   Enviar via headers.authorization: `token_de_autenticação`
 -   Enviar via body: like (true para like, false para dislike)
 
 **INPUT:**
@@ -324,7 +369,7 @@ A API fornece os seguintes endpoints:
 
 ## Lista de requisitos do projeto
 
-[🔼](#índice)
+[🔼](#projeto-labook)
 
 -   Documentação
 
@@ -358,7 +403,7 @@ A API fornece os seguintes endpoints:
 
 ## Tratamento de Erros
 
-[🔼](#índice)
+[🔼](#projeto-labook)
 
 O Labook implementa tratamento de erros para fornecer respostas adequadas em diferentes cenários. Abaixo estão alguns dos erros tratados no projeto:
 
@@ -395,7 +440,7 @@ O uso do Zod permite validar os dados recebidos de forma detalhada, gerando mens
 
 ## Desenvolvedora
 
-[🔼](#índice)
+[🔼](#projeto-labook)
 
 Este projeto foi desenvolvido por:
 
