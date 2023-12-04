@@ -8,6 +8,7 @@
 -   [4. Instalação](#instalação)
 -   [5. Inicialização](#inicialização)
 -   [6. Endpoints](#endpoints)
+    -   [Get Users](#get-users)
     -   [Signup](#signup)
     -   [Login](#login)
     -   [Create Post](#create-post)
@@ -95,6 +96,60 @@ A base URL para esta API é **`http://localhost:3003`**
 Os endpoints estão divididos em pastas de acordo com o que é gerenciado.
 A API fornece os seguintes endpoints:
 
+### Get users
+
+[🔼](#projeto-labook)
+
+-   Endpoint privado (Somente **administradores** podem acessar esse recurso)
+-   Método HTTP: GET
+-   Descrição: Retorna todos os usuários cadastrados no sistema.
+-   Enviar via headers.authorization: `token_de_autenticação`
+
+**INPUT:**
+
+```json
+// headers.authorization = "token_de_autenticação"
+```
+
+**OUTPUT:**
+
+```json
+[
+    {
+        "id": "7ed8d1f6-4b22-4a0e-a38b-45f275c32d21",
+        "name": "Morgana",
+        "email": "morgana@gmail.com",
+        "password": "$2a$12$IOmC1TDDM6YNMTTkRWqRxOeZ06jz/OnMsjLEHZdX5OrFD3sJIVBXy",
+        "role": "NORMAL",
+        "createdAt": "04-12-2023 11:31:26"
+    },
+    {
+        "id": "16f86eba-fde0-42f5-a251-b0afe72b5c93",
+        "name": "Amanda",
+        "email": "amanda@gmail.com",
+        "password": "$2a$12$7VRnTvXK8X5wsj84O207POIWCWhs/Ps8pw5wJH49OyuwqedAijnKe",
+        "role": "ADMIN",
+        "createdAt": "19-11-2023 12:27:51"
+    },
+    {
+        "id": "527348d8-434d-4243-b5c9-927d8e96b418",
+        "name": "Atlas",
+        "email": "atlas@gmail.com",
+        "password": "$2a$12$KOKtDri0bntdxt5488R1nOZabISu9jF4vBCOWIMlt6vcrUnp3hhm.",
+        "role": "NORMAL",
+        "createdAt": "19-11-2023 13:10:34"
+    },
+    {
+        "id": "8b4d95ab-0b13-4092-8661-0b29bfa46830",
+        "name": "Luan",
+        "email": "luan@gmail.com",
+        "password": "$2a$12$DMX1r916xqOPGrFgeVj0JeZXQYSOCmT5lzAmXc5tb2i3ddAO7geLi",
+        "role": "ADMIN",
+        "createdAt": "17-11-2023 14:26:54"
+    }
+]
+```
+
 ### Signup
 
 [🔼](#projeto-labook)
@@ -108,9 +163,9 @@ A API fornece os seguintes endpoints:
 
 ```json
 {
-    "name": "Nome do Usuário",
-    "email": "usuario@email.com",
-    "password": "senha123"
+    "name": "Morgana",
+    "email": "morgana@email.com",
+    "password": "Morgana@123"
 }
 ```
 
@@ -136,8 +191,8 @@ A API fornece os seguintes endpoints:
 
 ```json
 {
-    "email": "usuario@email.com",
-    "password": "senha123"
+    "email": "morgana@email.com",
+    "password": "Morgana@123"
 }
 ```
 
@@ -163,7 +218,7 @@ A API fornece os seguintes endpoints:
 **INPUT:**
 
 ```json
-// headers.authorization = "token"
+// headers.authorization = "token_de_autenticação"
 
 // body:
 {
