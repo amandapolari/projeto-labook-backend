@@ -389,33 +389,33 @@ A API fornece os seguintes endpoints:
 
 -   Documentação
 
-    -   [ ] Documentação Postman de todos os endpoints (obrigatória para correção)
+    -   [✔] Documentação Postman de todos os endpoints (obrigatória para correção)
 
 -   Endpoints
 
-    -   [ ] signup
-    -   [ ] login
-    -   [ ] create post
-    -   [ ] get posts
-    -   [ ] edit post
-    -   [ ] delete post
-    -   [ ] like / dislike post
+    -   [✔] signup
+    -   [✔] login
+    -   [✔] create post
+    -   [✔] get posts
+    -   [✔] edit post
+    -   [✔] delete post
+    -   [✔] like / dislike post
 
 -   Autenticação e Autorização
 
-    -   [ ] identificação UUID
-    -   [ ] senhas hasheadas com Bcrypt
-    -   [ ] tokens JWT
+    -   [✔] identificação UUID
+    -   [✔] senhas hasheadas com Bcrypt
+    -   [✔] tokens JWT
 
 -   Código
 
-    -   [ ] POO
-    -   [ ] Arquitetura em camadas
-    -   [ ] Roteadores no Express
+    -   [✔] POO
+    -   [✔] Arquitetura em camadas
+    -   [✔] Roteadores no Express
 
 -   README.md
 
-    -   [ ] Criar Readme
+    -   [✔] Criar Readme
 
 ## Tratamento de Erros
 
