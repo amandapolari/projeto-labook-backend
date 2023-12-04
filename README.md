@@ -21,13 +21,13 @@
 
 ## Resumo do Projeto
 
-[🔼](#índice)
+[🔼](#projeto-labook)
 
-O Labook é uma plataforma de rede social que permite a interação entre os usuários. Ao se cadastrar e fazer login na plataforma, os usuários podem criar, dar like ou dislike em postagens de outros usuários.
+O Labook é uma API de rede social que permite a interação entre os usuários. Ao se cadastrar e fazer login na plataforma, os usuários podem criar, dar like ou dislike em postagens de outros usuários.
 
 A plataforma oferece uma variedade de recursos e funcionalidades que incluem:
 
--   **Cadastro de Usuários**: Através do processo de cadastro, os usuários podem criar suas contas na plataforma, fornecendo informações pessoais básicas, como nome, endereço de e-mail e senha.
+-   **Cadastro de Usuários**: Através do processo de cadastro, os usuários podem criar suas contas na plataforma, fornecendo informações pessoais básicas como **nome**, **email** e **senha**.
 
 -   **Criação de Postagens**: Os membros do Labook têm a capacidade de compartilhar suas ideias, pensamentos e experiências por meio de postagens.
 
@@ -39,7 +39,7 @@ A plataforma oferece uma variedade de recursos e funcionalidades que incluem:
 
 ## Tecnologias e conteúdos utilizados
 
-[🔼](#índice)
+[🔼](#projeto-labook)
 
 -   NodeJS
 -   Typescript
@@ -56,7 +56,7 @@ A plataforma oferece uma variedade de recursos e funcionalidades que incluem:
 
 ## Banco de dados
 
-[🔼](#índice)
+[🔼](#projeto-labook)
 
 As entidades do banco de dados estão estruturadas da seguinte forma:
 
@@ -66,13 +66,9 @@ Clique [aqui](https://dbdiagram.io/d/63d16443296d97641d7c1ae1) para conferir o s
 
 ## Instalação
 
-[🔼](#índice)
+[🔼](#projeto-labook)
 
-#### Pré-requisitos:
-
-Ter instalado o `node.js` e o `npm` .
-
-#### Instalações necessárias:
+Ter instalado o `node.js`, o `npm` e rodar o seguinte comando:
 
 ```bash
 npm install
@@ -80,7 +76,7 @@ npm install
 
 ## Inicialização
 
-[🔼](#índice)
+[🔼](#projeto-labook)
 
 Para rodar o servidor localmente digite o seguinte comando:
 
@@ -90,7 +86,7 @@ npm run dev
 
 ## Endpoints
 
-[🔼](#índice)
+[🔼](#projeto-labook)
 
 Clique [**AQUI**](https://documenter.getpostman.com/view/28316385/2s9Ye8fuWG) para visualizar a documentação da [API LABOOK](https://documenter.getpostman.com/view/28316385/2s9Ye8fuWG).
 
@@ -101,11 +97,11 @@ A API fornece os seguintes endpoints:
 
 ### Signup
 
-[🔼](#índice)
+[🔼](#projeto-labook)
 
 -   Endpoint público
 -   Método HTTP: POST
--   Descrição: Cria um novo usuário
+-   Descrição: Cria um novo usuário.
 -   Enviar via body: `name`, `email` e `password`
 
 **INPUT:**
@@ -129,7 +125,7 @@ A API fornece os seguintes endpoints:
 
 ### Login
 
-[🔼](#índice)
+[🔼](#projeto-labook)
 
 -   Endpoint público
 -   Método HTTP: POST
@@ -156,7 +152,7 @@ A API fornece os seguintes endpoints:
 
 ### Create post
 
-[🔼](#índice)
+[🔼](#projeto-labook)
 
 -   Endpoint privado
 -   Método HTTP: POST
@@ -186,11 +182,11 @@ A API fornece os seguintes endpoints:
 
 ### Get posts
 
-[🔼](#índice)
+[🔼](#projeto-labook)
 
 -   Endpoint privado
 -   Método HTTP: GET
--   Descrição: Recupera uma lista de todos os usuários cadastrados no sistema.
+-   Descrição: Retorna um array de objetos, onde cada objeto contém as informações de um post.
 -   Enviar via headers.authorization: `token_de_autenticação`
 
 **INPUT:**
@@ -232,7 +228,7 @@ A API fornece os seguintes endpoints:
 
 ### Edit post
 
-[🔼](#índice)
+[🔼](#projeto-labook)
 
 -   Endpoint privado
 -   Método HTTP: PUT
@@ -265,7 +261,7 @@ A API fornece os seguintes endpoints:
 
 ### Delete post
 
-[🔼](#índice)
+[🔼](#projeto-labook)
 
 -   Endpoint privado
 -   Método HTTP: DELETE
@@ -289,13 +285,13 @@ A API fornece os seguintes endpoints:
 
 ### Like or dislike post
 
-[🔼](#índice)
+[🔼](#projeto-labook)
 
 -   Endpoint privado
 -   Método HTTP: PUT
 -   Descrição: Dá like ou dislike em um post que não foi criado por você.
 -   Enviar via params: id
--   Enviar via headers: Authorization
+-   Enviar via headers.authorization: `token_de_autenticação`
 -   Enviar via body: like (true para like, false para dislike)
 
 **INPUT:**
@@ -318,7 +314,7 @@ A API fornece os seguintes endpoints:
 
 ## Lista de requisitos do projeto
 
-[🔼](#índice)
+[🔼](#projeto-labook)
 
 -   Documentação
 
@@ -352,7 +348,7 @@ A API fornece os seguintes endpoints:
 
 ## Tratamento de Erros
 
-[🔼](#índice)
+[🔼](#projeto-labook)
 
 O Labook implementa tratamento de erros para fornecer respostas adequadas em diferentes cenários. Abaixo estão alguns dos erros tratados no projeto:
 
@@ -389,7 +385,7 @@ O uso do Zod permite validar os dados recebidos de forma detalhada, gerando mens
 
 ## Desenvolvedora
 
-[🔼](#índice)
+[🔼](#projeto-labook)
 
 Este projeto foi desenvolvido por:
 

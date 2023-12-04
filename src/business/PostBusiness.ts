@@ -181,16 +181,6 @@ export class PostBusiness {
         content && post.setContent(content);
         post.setUpdatedAt(newDate);
 
-        // const newPost: PostDB = {
-        //     id: post.getId(),
-        //     creator_id: post.getCreatedId(),
-        //     content: post.getContent(),
-        //     likes: post.getLikes(),
-        //     dislikes: post.getDislikes(),
-        //     created_at: post.getCreatedAt(),
-        //     updated_at: post.getUpdatedAt(),
-        // };
-
         const newPost = post.toPostDB();
 
         await this.postDatabase.updatePostById(
@@ -281,7 +271,7 @@ export class PostBusiness {
             );
         }
 
-        // Esse é o id de quem está logado:
+        // Esse é o id de quem está logado, pois foi obtido através do token:
         const userId = payload.id;
 
         // Buscando o post no banco de dados:

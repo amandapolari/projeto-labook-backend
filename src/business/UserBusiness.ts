@@ -1,6 +1,6 @@
 import { format } from 'date-fns';
 import { UserDatabase } from '../database/UserDatabase';
-import { TokenPayload, USER_ROLES, User, UserDB } from '../models/User';
+import { TokenPayload, USER_ROLES, User } from '../models/User';
 import { BadRequestError } from '../errors/BadRequestError';
 import { SignupInputDTO, SignupOutputDTO } from '../dtos/users/signupDto';
 import { LoginInputDTO, LoginOutputDTO } from '../dtos/users/loginDto';
@@ -18,7 +18,7 @@ export class UserBusiness {
         private hashManager: HashManager
     ) {}
 
-    // GET => APENAS PARA AJUDAR A CODIFICAR | NÃO TEM ARQUITETURA APLICADA
+    // GET => Endpoint para teste protegido para somente administradores poderem utilizar:
     public getUsers = async (input: GetUsersInputDTO) => {
         const { q, token } = input;
 
@@ -57,7 +57,7 @@ export class UserBusiness {
         return output;
     };
 
-    // SIGNUP (OBRIGATÓRIO)
+    // SIGNUP
     public signup = async (input: SignupInputDTO): Promise<SignupOutputDTO> => {
         const { name, email, password } = input;
 
@@ -77,8 +77,6 @@ export class UserBusiness {
             email,
             hashPassword,
             USER_ROLES.NORMAL,
-            // Somente para teste:
-            // USER_ROLES.ADMIN,
             format(new Date(), 'dd-MM-yyyy HH:mm:ss')
         );
 
@@ -89,7 +87,6 @@ export class UserBusiness {
         const payload: TokenPayload = {
             id: newUser.getId(),
             name: newUser.getName(),
-            // role: newUser.getRole(),
             role: newUser.getRole() as USER_ROLES,
         };
 
@@ -103,7 +100,7 @@ export class UserBusiness {
         return output;
     };
 
-    // LOGIN (OBRIGATÓRIO)
+    // LOGIN
     public login = async (input: LoginInputDTO): Promise<LoginOutputDTO> => {
         const { email, password } = input;
 
@@ -144,124 +141,6 @@ export class UserBusiness {
         const output: LoginOutputDTO = {
             message: 'Login realizado com sucesso',
             token: token,
-        };
-
-        return output;
-    };
-
-    // UPDATE => APENAS PARA AJUDAR A CODIFICAR | NÃO TEM ARQUITETURA APLICADA
-    public updateUser = async (input: any) => {
-        const {
-            id,
-            newId,
-            newName,
-            newEmail,
-            newPassword,
-            newRole,
-            newCreatedAt,
-        } = input;
-
-        const userDBExists = await this.userDatabase.findUserById(id);
-
-        if (!userDBExists) {
-            throw new BadRequestError("'id' não encontrado");
-        }
-
-        const user = new User(
-            userDBExists.id,
-            userDBExists.name,
-            userDBExists.email,
-            userDBExists.password,
-            userDBExists.role,
-            userDBExists.created_at
-        );
-
-        if (newId !== undefined) {
-            if (typeof newId !== 'string') {
-                throw new BadRequestError("'newId' deve ser string");
-            }
-        }
-
-        if (newName !== undefined) {
-            if (typeof newName !== 'string') {
-                throw new BadRequestError("'newName' deve ser string");
-            }
-        }
-
-        if (newEmail !== undefined) {
-            if (typeof newEmail !== 'string') {
-                throw new BadRequestError("'newEmail' deve ser string");
-            }
-        }
-
-        if (newPassword !== undefined) {
-            if (typeof newPassword !== 'string') {
-                throw new BadRequestError("'newPassword' deve ser string");
-            }
-        }
-
-        if (newRole !== undefined) {
-            if (typeof newRole !== 'string') {
-                throw new BadRequestError("'newRole' deve ser string");
-            }
-        }
-
-        if (newCreatedAt !== undefined) {
-            if (typeof newCreatedAt !== 'string') {
-                // res.status(400);
-                throw new BadRequestError("'newCreatedAt' deve ser string");
-            }
-        }
-
-        newId && user.setId(newId);
-        newName && user.setName(newName);
-        newEmail && user.setEmail(newEmail);
-        newPassword && user.setPassword(newPassword);
-        newRole && user.setRole(newRole);
-        newCreatedAt && user.setUpdatedAt(newCreatedAt);
-
-        const newUser: UserDB = {
-            id: user.getId(),
-            name: user.getName(),
-            email: user.getEmail(),
-            password: user.getPassword(),
-            role: user.getRole(),
-            created_at: user.getUpdatedAt(),
-        };
-
-        await this.userDatabase.updateUserById(id, newUser);
-
-        const output = {
-            message: 'Usuário atualizado com sucesso',
-            user: user,
-        };
-
-        return output;
-    };
-
-    // DELETE => APENAS PARA AJUDAR A CODIFICAR | NÃO TEM ARQUITETURA APLICADA
-    public deleteUser = async (input: any) => {
-        const { id } = input;
-
-        const userDBExists = await this.userDatabase.findUserById(id);
-
-        if (!userDBExists) {
-            throw new BadRequestError("'id' não existe");
-        }
-
-        const user = new User(
-            userDBExists.id,
-            userDBExists.name,
-            userDBExists.email,
-            userDBExists.password,
-            userDBExists.role,
-            userDBExists.created_at
-        );
-
-        await this.userDatabase.deleteUserById(id);
-
-        const output = {
-            message: 'Usuário deletado com sucesso',
         };
 
         return output;
