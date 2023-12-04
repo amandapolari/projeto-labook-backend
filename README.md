@@ -1,4 +1,20 @@
-# Projeto Labook
+<h1 align="center">Projeto Labook</h1>
+
+<div align="center">
+
+![endpoints_postman](./src/images/image-1.png)
+
+Clique [**AQUI**](https://documenter.getpostman.com/view/28316385/2s9Ye8fuWG#intro) para conferir o resultado final da API!
+
+<p align="center">
+<br>
+  <a href="https://skillicons.dev">
+    <img src="https://skillicons.dev/icons?i=nodejs,typescript,express,mysql,sqlite,postman," style="height: 25px;"/>
+  </a>
+</p>
+<p align="center"><strong>Status do Projeto:<br></strong>Concluído ✔</p>
+
+</div>
 
 ## Índice
 
@@ -61,7 +77,7 @@ A plataforma oferece uma variedade de recursos e funcionalidades que incluem:
 
 As entidades do banco de dados estão estruturadas da seguinte forma:
 
-![Bando de dados no dbdiagrama.io](image.png)
+![Bando de dados no dbdiagrama.io](./src/images/image.png)
 
 Clique [aqui](https://dbdiagram.io/d/63d16443296d97641d7c1ae1) para conferir o site com a estrutura do banco de dados.
 
